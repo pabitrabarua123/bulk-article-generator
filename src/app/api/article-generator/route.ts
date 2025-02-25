@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id; // Extract userId from session
+    const userId = session?.user.id as string;
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     const batch = searchParams.get("batch");
@@ -88,10 +88,11 @@ export async function POST(request: Request) {
     });
 
     const aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
-
+    
+    const userId = session?.user.id as string;
     const newArticle = await prismaClient.articles.create({
       data: {
-        userId: session?.user.id,
+        userId,
         content: aiResponse,
         batch: batch,
         keyword: text
