@@ -21,9 +21,10 @@ import {
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { TbMenu2 } from "react-icons/tb";
+import { Routes } from "@/data/routes";
 
 type KeywordPageProps = {
-  currentPage: string;
+  currentPage: Routes;
   id: string;
 };
 
