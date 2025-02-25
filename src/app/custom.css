@@ -1,0 +1,10 @@
+.ql-toolbar.ql-snow span, 
+.ql-toolbar.ql-snow button {
+    color: #fff;
+}
+.ql-snow .ql-stroke {
+    stroke: #fff !important;
+}
+.ql-editor {
+    color: #64748b;
+}

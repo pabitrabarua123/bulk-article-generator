@@ -9,4 +9,6 @@ export enum Routes {
   signUp = "/signup",
   terms = "/terms",
   todo = "/todo",
+  articlegenerator = "/article-generator",
+  articles = "/articles"
 }

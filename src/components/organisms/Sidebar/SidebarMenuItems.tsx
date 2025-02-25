@@ -222,12 +222,21 @@ export const SidebarMenuItems: React.FC<MenuProps> = ({
         </MenuItem>
 
         <MenuItem
-          route={Routes.todo}
+          route={Routes.articlegenerator}
           currentPage={currentPage}
           onClick={onMenuItemClick}
           loadingRoute={loadingRoute}
         >
-          <TbChecklist size="16px" /> &nbsp;<MenuLabel>Todo</MenuLabel>
+          <TbChecklist size="16px" /> &nbsp;<MenuLabel>Article Generator</MenuLabel>
+        </MenuItem>
+
+        <MenuItem
+          route={Routes.articles}
+          currentPage={currentPage}
+          onClick={onMenuItemClick}
+          loadingRoute={loadingRoute}
+        >
+          <TbChecklist size="16px" /> &nbsp;<MenuLabel>Articles</MenuLabel>
         </MenuItem>
 
         <Text

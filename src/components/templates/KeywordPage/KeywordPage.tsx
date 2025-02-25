@@ -1,11 +1,7 @@
 "use client";
 
 import { SideBar, sidebarWidth } from "@/components/organisms/Sidebar/Sidebar";
-import { Dashboard } from "@/components/pages/Dashboard/Dashboard";
-import Todo from "@/components/pages/Todo/Todo";
-import ArticleGenerator from "@/components/pages/ArticleGenerator/ArticleGenerator";
-import Articles from "@/components/pages/Articles/Articles";
-import { Routes } from "@/data/routes";
+import Keyword from "@/components/pages/Keyword/Keyword";
 import { useMobile } from "@/hooks/useMobile";
 import {
   Button,
@@ -26,11 +22,13 @@ import {
 import { useSession } from "next-auth/react";
 import { TbMenu2 } from "react-icons/tb";
 
-type WebAppPageProps = {
-  currentPage: Routes;
+type KeywordPageProps = {
+  currentPage: string;
+  id: string;
 };
 
-export const WebAppPage = ({ currentPage }: WebAppPageProps) => {
+export const KeywordPage = ({ currentPage, id}: KeywordPageProps) => {
+    console.log(id)
   const isMobile = useMobile();
   const { data: session, status } = useSession();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -106,26 +104,10 @@ export const WebAppPage = ({ currentPage }: WebAppPageProps) => {
               marginInlineEnd: "0",
             }}
           >
-            {currentPage === Routes.dashboard && (
-              <Center w="100%" flexDir="column">
-                <Dashboard />
+            <Center w="100%" flexDir="column">
+                <Keyword id={id} />
               </Center>
-            )}
-            {currentPage === Routes.todo && (
-              <Center w="100%" flexDir="column">
-                <Todo />
-              </Center>
-            )}
-            {currentPage === Routes.articlegenerator && (
-              <Center w="100%" flexDir="column">
-                <ArticleGenerator />
-              </Center>
-            )} 
-            {currentPage === Routes.articles && (
-              <Center w="100%" flexDir="column">
-                <Articles />
-              </Center>
-            )} 
+            
             {/* Add the route components here */}
           </Flex>
         </>

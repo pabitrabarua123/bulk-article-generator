@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./custom.css";
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { cookies } from "next/headers";

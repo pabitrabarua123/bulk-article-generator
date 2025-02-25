@@ -173,3 +173,13 @@ model Todo {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Articles {
+  id          String   @id @default(cuid())
+  userId      String
+  keyword     String  
+  content     String
+  batch       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
