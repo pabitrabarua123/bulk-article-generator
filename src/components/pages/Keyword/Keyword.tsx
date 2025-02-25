@@ -79,10 +79,35 @@ const Keyword = ({id}: {id: string}) => {
     return await updateTodoMutation.mutateAsync(todo);
   };
 
+  const copyContent = () => {
+    const content = getHTMLContent("my-quill-editor");
+    if (content) {
+      copyToClipboard(content);
+    }
+  };
+  
+  const getHTMLContent = (nodeId: string): string | null => {
+    const node = document.getElementById(nodeId);
+    return node ? node.innerHTML : null;
+  };
+  
+  const copyToClipboard = async (html: string) => {
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([html], { type: "text/plain" }), // Fallback for plain text
+        }),
+      ]);
+      console.log("Content copied as rich text!");
+      toast.success("Article copied into the clipboard");
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
+  };
+
   if (isLoading) return <Text>Loading article...</Text>;
   if (error) return <Text>An error occurred: {error.message}</Text>;
-
-  
 
   return (
     <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">
@@ -98,7 +123,7 @@ const Keyword = ({id}: {id: string}) => {
         </Text>
         <div className="rounded-md w-full">
             <div>
-              <ReactQuill theme="snow" value={editorText} style={{ height: "400px" }} onChange={setEditorText}/>
+              <ReactQuill id="my-quill-editor" theme="snow" value={editorText} style={{ height: "400px" }} onChange={setEditorText}/>
             </div>
         </div>
         <br/>
@@ -107,7 +132,7 @@ const Keyword = ({id}: {id: string}) => {
             id: todos[0].id,
             content: editorText,
           })}>Update</Button>
-          <Button>Copy</Button>
+          <Button onClick={copyContent}>Copy</Button>
         </div>
       </VStack>
     </Container>

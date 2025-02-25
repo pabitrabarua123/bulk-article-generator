@@ -98,7 +98,7 @@ const ArticlesList: React.FC = () => {
   } = useQuery({
     queryKey: ["todos", batch_param],
     queryFn: async () => {
-      const url = batch_param ? `/api/article-generator?id=${batch_param}` : "/api/article-generator";
+      const url = batch_param ? `/api/article-generator?batch=${batch_param}` : "/api/article-generator";
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -285,9 +285,13 @@ const ArticlesList: React.FC = () => {
   return (
     <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">
       <VStack align="flex-start" spacing={4}>
-        <Heading size="md">{batch_param}</Heading>
+        <Heading size="md">{batch_param ? batch_param : 'Articles generated' }</Heading>
         <Text className="text-slate-500 text-sm">
-          Here is a list of articles generated from the tool.
+         {batch_param ? 
+          'Here is a list of articles generated for this batch'
+            : 
+          'Here is a list of articles generated from the tool.'
+         } 
         </Text>
         <Button 
            colorScheme="brand" 

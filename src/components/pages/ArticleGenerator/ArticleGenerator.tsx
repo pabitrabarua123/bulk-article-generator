@@ -92,7 +92,7 @@ const ArticleGenerator: React.FC = () => {
       console.log("OpenAI Response:", response.aiResponse);
     }
     setIsProcessing(false);
-    router.push('/articles');
+    router.push(`/articles?batch=${batch}`);
     console.log("All requests finished!");
   };
 
