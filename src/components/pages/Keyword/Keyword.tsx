@@ -20,7 +20,7 @@ import { Articles } from "@prisma/client";
 import { queryClient } from "@/app/providers";
 import { useRouter } from "next/navigation";
 
-const Keyword: React.FC = ({id}: {id: string}) => {
+const Keyword = ({id}: {id: string}) => {
   
   const router = useRouter();
   const {
