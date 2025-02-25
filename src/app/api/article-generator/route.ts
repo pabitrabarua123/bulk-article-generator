@@ -5,7 +5,7 @@ import { authOptions } from "@/config/auth";
 import { OpenAI } from "openai";
 
 // Function to get all articles for a user
-async function getAllArticles(userId: number) {
+async function getAllArticles(userId: string) {
   return await prismaClient.articles.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -13,7 +13,7 @@ async function getAllArticles(userId: number) {
 }
 
 // Function to get articles by batch for a user
-async function getArticlesByBatch(userId: number, batch: string) {
+async function getArticlesByBatch(userId: string, batch: string) {
   return await prismaClient.articles.findMany({
     where: { userId, batch },
     orderBy: { createdAt: "desc" },
