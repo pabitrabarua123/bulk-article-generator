@@ -83,18 +83,33 @@ const ArticleGenerator: React.FC = () => {
 
   const sendKeywordsSequentially = async (keywords: string[]) => {
     setIsProcessing(true);
+        
+    const interval = setInterval(() => {
+      setProgress((prev) => Math.min(prev + 0.3, 95)); // Slow continuous progress
+    }, 1000);
+
     for (let i = 0; i < keywords.length; i++) {
       setCurrentKeyword(keywords[i]);
-      const response = await generateArticle.mutateAsync({batch: batch !== '' ? batch : 'Untitled', text: keywords[i], prompt: prompt});
-      const progressPercent = ((i + 1) / keywords.length) * 100;
-      setProgress(progressPercent);
-      console.log(`Finished processing: ${keywords[i]}`);
-      console.log("OpenAI Response:", response.aiResponse);
+      try {
+        await generateArticle.mutateAsync({
+          batch: batch !== "" ? batch : "Untitled",
+          text: keywords[i],
+          prompt: prompt,
+        });
+      } catch (error) {
+        console.error(`Error processing keyword "${keywords[i]}":`, error);
+        toast.error(`Error creating article for the keyword: "${keywords[i]}"`);
+      }
+      
+      let progressPercent = ((i + 1) / keywords.length) * 100;
+      setProgress(progressPercent); // Jump to the actual progress when result is received
     }
     setIsProcessing(false);
+    clearInterval(interval);
     router.push(`/articles?batch=${batch}`);
     console.log("All requests finished!");
   };
+
 
   return (
     <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">

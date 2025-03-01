@@ -279,7 +279,7 @@ const ArticlesList: React.FC = () => {
     setIsEditDialogOpen(false);
   };
 
-  if (isLoading) return <Text>Loading articles...</Text>;
+ // if (isLoading) return <Text>Loading articles...</Text>;
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
   return (
@@ -341,7 +341,7 @@ const ArticlesList: React.FC = () => {
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    {isLoading ? 'Loading...' : 'No results.'}
                   </TableCell>
                 </TableRow>
               )}
