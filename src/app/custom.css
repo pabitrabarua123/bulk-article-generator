@@ -8,3 +8,28 @@
 .ql-editor {
     color: #64748b;
 }
+.chakra-input, .chakra-textarea {
+    width: 100%;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #E2E8F0;
+    font-size: 1rem;
+}
+.custom-btn-1 {
+    background-color: transparent;
+    color: #E2E8F0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    line-height: 17px;
+    height: unset;
+}
+.custom-btn-1:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}

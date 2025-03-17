@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { Articles } from "@prisma/client";
 import { queryClient } from "@/app/providers";
 import { useRouter } from "next/navigation";
+import { HStack, Stack, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 
 const Keyword = ({id}: {id: string}) => {
   
@@ -28,7 +29,7 @@ const Keyword = ({id}: {id: string}) => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["todos"],
+    queryKey: ["todos", id],
     queryFn: async () => {
       const response = await fetch(`/api/article-generator?id=${id}`);
       if (!response.ok) {
@@ -106,7 +107,17 @@ const Keyword = ({id}: {id: string}) => {
     }
   };
 
-  if (isLoading) return <Text>Loading article...</Text>;
+  if(isLoading) return(
+   <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">
+    <Stack gap="4">
+      <Skeleton height="5" width="50%"/>
+      <Skeleton height="3" width="20%"/>
+      <Skeleton height="350" width="100%"/>
+      <Skeleton height="6" width="100px"/>
+    </Stack>
+   </Container>
+  )
+  
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
   return (

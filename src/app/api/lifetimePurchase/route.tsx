@@ -26,12 +26,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const { priceId } = await request.json();
+const { priceId } = await request.json();
 try{
   let session1:any = await stripeClient.checkout.sessions.create({
     billing_address_collection: "auto",
     line_items: [{ price: priceId, quantity: 1 }],
-    mode: "subscription",
+    mode: "payment",
     customer_email: session.user.email,
     success_url: process.env.STRIPE_SUCCESS_URL, 
     cancel_url: process.env.STRIPE_CANCEL_URL,
@@ -40,6 +40,5 @@ try{
 }catch(error:any){
   return NextResponse.json({ error: error.message }, { status: 500 });
 }
-
 
 }

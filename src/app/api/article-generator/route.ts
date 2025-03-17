@@ -75,20 +75,41 @@ const openai = new OpenAI({
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   try {
-    const {batch, text, prompt} = await request.json();
+    const {batch, text, prompt, is_godmode} = await request.json();
     if (!text || typeof text !== "string") {
       return NextResponse.json({ error: "Invalid keyword" }, { status: 400 });
     }
-    let content = prompt.replace('KEYWORD', text);
-    // Send keyword to OpenAI
-    const response = await openai.chat.completions.create({
-      model: "gpt-4", // Use GPT-4 or another model
-      messages: [{ role: "user", content: content }],
-      temperature: 0.7,
-    });
+    let aiResponse = '';
+    if(is_godmode){
+        console.log(text);
+        const params = new URLSearchParams();
+        params.append('keyword', 'biodiesel production process');
+        params.append('comment', '.'); // or any value you want to send
+        params.append('featured_image_required', 'No');
+        params.append('additional_image_required', 'No');
+        params.append('expand_article', 'No');
+        params.append('links', '.');
+        params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
 
-    const aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
-    
+        const response = await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+           body: params.toString()
+        });
+
+        aiResponse = await response.text();
+        console.log(aiResponse); // I console the value as "Accepted"
+    }else{
+      let content = prompt.replace('KEYWORD', text);
+      // Send keyword to OpenAI
+      const response = await openai.chat.completions.create({
+        model: "gpt-4", // Use GPT-4 or another model
+        messages: [{ role: "user", content: content }],
+        temperature: 0.7,
+      });
+      aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
+    }
+
     const userId = session?.user.id as string;
     const newArticle = await prismaClient.articles.create({
       data: {
@@ -111,29 +132,31 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  try {
-    const { id, content } = await request.json();
+  try {    
+    const session = await getServerSession(authOptions);
+    const userId = session?.user.id as string;
 
-    if (!id || typeof id !== "string") {
-      return NextResponse.json({ error: "Invalid todo id" }, { status: 400 });
-    }
-
-    if (content !== undefined && typeof content !== "string") {
-      return NextResponse.json({ error: "Invalid todo text" }, { status: 400 });
-    }
-
-    const updatedContent = await prismaClient.articles.update({
-      where: { id },
-      data: {
-        ...(content !== undefined && { content }),
+    const request_data = await request.json();
+    const balanceField = request_data.balance_type;
+    console.log(balanceField);
+    
+    if(request_data.type === 'update_balance'){
+      const updated = await prismaClient.user.update({
+        where: { id: userId },
+        data: {
+          [balanceField]: (request_data.balance - request_data.no_of_keyword),
       },
     });
-
-    return NextResponse.json({ todo: updatedContent });
+    if(updated){
+      return NextResponse.json({ status: 'success' });
+    }else{
+      return NextResponse.json({ status: 'failure' });
+    }
+    }
   } catch (error) {
-    console.error("Error updating todo:", error);
+    console.error("Error updating", error);
     return NextResponse.json(
-      { error: "Failed to update todo" },
+      { error: "Failed to update" },
       { status: 500 }
     );
   }

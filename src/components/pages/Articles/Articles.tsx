@@ -13,12 +13,9 @@ import {
   TbArrowBack,
   TbArrowDown,
   TbArrowUp,
-  TbCheck,
-  TbChevronDown,
   TbDots,
   TbPencil,
   TbEye,
-  TbPlus,
   TbTrash,
 } from "react-icons/tb";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -154,19 +151,10 @@ const ArticlesList: React.FC = () => {
   const columns = [
     columnHelper.accessor("keyword", {
       cell: (info) => (
-        <Input
-          defaultValue={info.getValue()}
+        <Text
           size="sm"
           border="none"
-          onBlur={(e) => {
-            if (info.row.original.keyword !== e.target.value) {
-              handleUpdateTodo({
-                id: info.row.original.id,
-                content: e.target.value,
-              });
-            }
-          }}
-        />
+        >{info.getValue()}</Text>
       ),
       header: "Keyword",
     }),

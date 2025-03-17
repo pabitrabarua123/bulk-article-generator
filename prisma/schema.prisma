@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -39,18 +39,26 @@ model Session {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  name           String?
-  email          String?          @unique
-  emailVerified  DateTime?
-  image          String?
-  age            Int? 
-  accounts       Account[]
-  sessions       Session[]
-  UserPlan       UserPlan?
-  UserOnboarding UserOnboarding[]
-  WorkspaceUsers WorkspaceUsers[]
-  Workspace      Workspace[]
+  id                String           @id @default(cuid())
+  name              String?
+  email             String?          @unique
+  emailVerified     DateTime?
+  image             String?
+  age               Int?
+  dailyBalance      Int              @default(30)
+  LiteModeBalance   Int              @default(0)
+  monthyBalance     Int              @default(0)
+  monthyPlan        Int              @default(0)
+  lifetimeBalance   Int              @default(0)
+  lifetimePlan      Int              @default(0)
+  trialBalance      Int              @default(0)
+  accounts          Account[]
+  sessions          Session[]
+  UserPlan          UserPlan?        @relation(fields: [userPlanId], references: [id])
+  UserOnboarding    UserOnboarding[]
+  WorkspaceUsers    WorkspaceUsers[]
+  Workspace         Workspace[]
+  userPlanId        String?
 }
 
 model VerificationToken {
@@ -62,31 +70,25 @@ model VerificationToken {
 }
 
 model SubscriptionPlan {
-  id         String         @id @default(cuid())
-  name       String
-  productId  String
-  priceId    String?
-  price      String
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  properties PlanProperty[]
-  users      UserPlan[]
+  id        Int    @id @default(autoincrement())
+  name      String
+  productId String
+  priceId   String
+  price     Int
+  features  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum PlanPropertyName {
-  MAX_USERS
-  MAX_PROJECTS
-  MAX_TASKS
-}
-
-model PlanProperty {
-  id           String           @id @default(cuid())
-  planId       String
-  propertyName PlanPropertyName
-  value        String
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  plan         SubscriptionPlan @relation(fields: [planId], references: [id])
+model LifetimePlan {
+  id        Int    @id @default(autoincrement())
+  name      String
+  productId String
+  priceId   String
+  price     Int
+  features  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model UserPlan {
@@ -104,14 +106,13 @@ model UserPlan {
   stripeSubscriptionId String?
   stripePriceId        String?
 
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
   validUntil DateTime?
   cancelUrl  String?
   updateUrl  String?
   status     String?
-  user       User             @relation(fields: [userId], references: [id])
-  plan       SubscriptionPlan @relation(fields: [planId], references: [id])
+  User       User[]
 }
 
 model UserOnboarding {
@@ -175,11 +176,11 @@ model Todo {
 }
 
 model Articles {
-  id          String   @id @default(cuid())
-  userId      String
-  keyword     String  
-  content     String
-  batch       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  keyword   String
+  content   String
+  batch     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
