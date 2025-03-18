@@ -115,7 +115,7 @@ const ArticleGenerator: React.FC = () => {
           batch: batchRef.current !== "" ? batchRef.current : "Untitled",
           text: keywords[i],
           prompt: prompt,
-          is_godmode: true,
+          is_godmode: isGodMode,
         });
       } catch (error) {
         console.error(`Error processing keyword "${keywords[i]}":`, error);
@@ -128,7 +128,7 @@ const ArticleGenerator: React.FC = () => {
     setIsProcessing(false);
     clearInterval(interval);
     updateBalance(keywords.length);
-    //router.push(`/articles?batch=${batchRef.current}`);
+    router.push(`/articles?batch=${batchRef.current}`);
     console.log("All requests finished!");
   };
 
@@ -213,6 +213,8 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
       return response.json();
     }
   });
+
+  //const [countdown, setCountdown] = useState(""); 
 
   return (
     <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">
