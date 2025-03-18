@@ -202,6 +202,18 @@ const ArticleGenerator: React.FC = () => {
     }
   }, [isGodMode, user]);
 
+
+const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await fetch("/api/products");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    }
+  });
+
   return (
     <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">
       <VStack align="flex-start" spacing={4}>
@@ -251,7 +263,7 @@ const ArticleGenerator: React.FC = () => {
     Change Prompt
   </Button>
   <Text fontSize="sm" color="gray.600">
-    {balance.balance_text}: {balance.credits} { user && user?.LiteModeBalance > 0 ? '' : '/30'}
+    {balance.balance_text}: {balance.credits}{ user && user?.LiteModeBalance > 0 ? '' : '/30'}
   </Text>
 </Flex>
 )}
@@ -352,6 +364,9 @@ const ArticleGenerator: React.FC = () => {
          onClose={closePricingPopup}
          activeTab={activeTab}
          setActiveTab={setActiveTab}
+         productData={productData} 
+         isLoadingPrice={isLoadingPrice}
+         errorPrice={errorPrice}
         />
      )}
 
@@ -458,32 +473,37 @@ const EditPromptDialog = ({
   );
 };
 
+interface SubscriptionPlan {
+  id: number;
+  name: string;
+  productId: string;
+  priceId: string;
+  price: number;
+  features: string;
+}
+
+interface ProductData {
+  subscriptionPlans?: SubscriptionPlan[];
+  lifetimePlans?: SubscriptionPlan[]; // Add this if lifetimePlans also exists
+}
+
 interface PricingPopupProps {
   isOpen: boolean;
   onClose: () => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  productData: ProductData,
+  isLoadingPrice: boolean,
+  errorPrice: Error | null,
 }
 
-const PricingPopup: React.FC<PricingPopupProps> = ({ isOpen, onClose, activeTab, setActiveTab }) => {
+const PricingPopup: React.FC<PricingPopupProps> = ({ isOpen, onClose, activeTab, setActiveTab, productData, isLoadingPrice, errorPrice }) => {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   if (!isOpen) return null;
 
   const handleTabClick = (tab: string): void => {
     setActiveTab(tab);
   };
- 
-  const { data: productData, isLoading, error } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const response = await fetch("/api/products");
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    },
-    enabled: isOpen
-  });
 
   const payStripeSubscription = async (priceId: string) => {
     setProcessingPlan(priceId);
@@ -566,7 +586,7 @@ const PricingPopup: React.FC<PricingPopupProps> = ({ isOpen, onClose, activeTab,
         <div className="overflow-y-auto">
           {activeTab === 'monthly' ? (
             <div className="flex flex-col md:flex-row p-4 md:p-6 gap-4">
-              {isLoading && 'Loading plans...'}
+              {isLoadingPrice && 'Loading plans...'}
 
 { productData?.subscriptionPlans &&
   productData?.subscriptionPlans.map((plan: {id: number; name: string; productId: string; priceId: string; price: number; features: string}) => (

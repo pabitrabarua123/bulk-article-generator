@@ -49,6 +49,54 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     case "checkout.session.completed":
       const checkoutSession = event.data.object as Stripe.Checkout.Session;
+      let customer_email = checkoutSession.customer_email;
+      
+      const user1 = await prismaClient.user.findFirst({
+        where: {
+          email: customer_email as string,
+        },
+      });
+
+      if (!user1) {
+        return NextResponse.json({ error: "User not found" }, { status: 400 });
+      }
+
+      let amount_total_real = (checkoutSession.amount_total ?? 0) / 100;
+      var LiteModeBalance:number = 0;
+      var lifetimeBalance:number = 0;
+      var lifetimePlan:number = 0;
+      switch (amount_total_real) {
+        case 45:
+          LiteModeBalance = 100;
+          lifetimeBalance = 10;
+          lifetimePlan = 10;
+          break;
+          
+        case 120:
+          LiteModeBalance = 150;
+          lifetimeBalance = 30;
+          lifetimePlan = 30;
+          break;
+        
+        case 300:
+          LiteModeBalance = 300;
+          lifetimeBalance = 100;
+          lifetimePlan = 100;
+          break;
+      }
+
+      if(checkoutSession.mode == 'payment') {
+        await prismaClient.user.update({
+          where: {
+            id: user1?.id,
+          },
+          data: {
+            LiteModeBalance: LiteModeBalance,
+            lifetimeBalance: lifetimeBalance,
+            lifetimePlan: lifetimePlan,
+          }
+        });
+      }
 
       break;
 
@@ -104,6 +152,30 @@ export async function POST(req: NextRequest): Promise<Response> {
           }
         );
       }
+      
+      var LiteModeBalance:number = 0;
+      var monthyBalance:number = 0;
+      var monthyPlan:number = 0;
+
+switch (stripeProductId) {
+  case 'prod_RvYm6afChyL0FG':
+    LiteModeBalance = 200;
+    monthyBalance = 10;
+    monthyPlan = 10;
+    break;
+
+  case 'prod_RvYnETS90oCkLS':
+    LiteModeBalance = 600;
+    monthyBalance = 30;
+    monthyPlan = 30;
+    break;
+
+  case 'prod_RvYp4zjHnn0zDL':
+    LiteModeBalance = 1400;
+    monthyBalance = 100;
+    monthyPlan = 100;
+    break;
+}
 
       await prismaClient.userPlan.upsert({
         where: {
@@ -124,6 +196,18 @@ export async function POST(req: NextRequest): Promise<Response> {
           validUntil: new Date(subscription.current_period_end * 1000),
         },
       });
+
+      await prismaClient.user.update({
+        where: {
+          id: user?.id,
+        },
+        data: {
+          LiteModeBalance: LiteModeBalance,
+          monthyBalance: monthyBalance,
+          monthyPlan: monthyPlan,
+        }
+      });
+
       break;
 
     case "invoice.paid":
