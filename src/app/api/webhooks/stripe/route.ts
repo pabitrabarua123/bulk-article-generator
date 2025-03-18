@@ -189,7 +189,7 @@ switch (stripeProductId) {
         },
         create: {
           userId: user?.id,
-          planId: subscriptionPlan.id,
+          planId: String(subscriptionPlan?.id),
           stripeSubscriptionId: subscription.id,
           stripeCustomerId: subscription.customer as string,
           stripePriceId: subscription.items.data[0].price.id,
