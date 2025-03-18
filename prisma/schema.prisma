@@ -94,7 +94,7 @@ model LifetimePlan {
 model UserPlan {
   id                  String  @id @default(cuid())
   userId              String  @unique
-  planId              String
+  planId              Int?
   lemonOrderId        String?
   lemonProductId      String?
   lemonVariantId      String?
