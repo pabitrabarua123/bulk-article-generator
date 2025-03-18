@@ -51,7 +51,7 @@ model User {
   monthyPlan        Int              @default(0)
   lifetimeBalance   Int              @default(0)
   lifetimePlan      Int              @default(0)
-  trialBalance      Int              @default(0)
+  trialBalance      Int              @default(2)
   accounts          Account[]
   sessions          Session[]
   UserPlan          UserPlan?        @relation(fields: [userPlanId], references: [id])
