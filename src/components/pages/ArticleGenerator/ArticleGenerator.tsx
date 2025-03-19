@@ -103,6 +103,10 @@ const ArticleGenerator: React.FC = () => {
       openTimerPopup();
       return;
     }
+    if(keywords.length > balance.credits){
+       toast.error("Keywords Length is greater than the balance");
+       return;
+    }
     setIsProcessing(true);
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + 0.3, 95)); // Slow continuous progress

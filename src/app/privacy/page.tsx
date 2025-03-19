@@ -40,6 +40,11 @@ import { brandName } from "@/config";
   Write the content in HTML format.
 */
 
+export const metadata = {
+  title: `Privacy Policy | Bulk Article Generator`,
+  description: '',
+};
+
 function PrivacyPage() {
   return (
     <div>

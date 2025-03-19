@@ -52,6 +52,7 @@ const Keyword = ({id}: {id: string}) => {
     mutationFn: async (updatedTodo: {
       id: string;
       content?: string;
+      type: string
     }) => {
       const response = await fetch("/api/article-generator", {
         method: "PUT",
@@ -75,7 +76,7 @@ const Keyword = ({id}: {id: string}) => {
   });
 
   const handleUpdateTodo = async (
-    todo: Pick<Articles, "id" | "content">
+    todo: {id: string, content: string, type: string}
   ) => {
     return await updateTodoMutation.mutateAsync(todo);
   };
@@ -142,6 +143,7 @@ const Keyword = ({id}: {id: string}) => {
           <Button colorScheme="brand" onClick={() => handleUpdateTodo({
             id: todos[0].id,
             content: editorText,
+            type: 'article_upadte'
           })}>Update</Button>
           <Button onClick={copyContent}>Copy</Button>
         </div>

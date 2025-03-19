@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     if(is_godmode){
         console.log(text);
         const params = new URLSearchParams();
-        params.append('keyword', 'biodiesel production process');
+        params.append('keyword', text);
         params.append('comment', '.'); // or any value you want to send
         params.append('featured_image_required', 'No');
         params.append('additional_image_required', 'No');
@@ -137,22 +137,43 @@ export async function PUT(request: Request) {
     const userId = session?.user.id as string;
 
     const request_data = await request.json();
-    const balanceField = request_data.balance_type;
-    console.log(balanceField);
     
     if(request_data.type === 'update_balance'){
+      const balanceField = request_data.balance_type;
+      console.log(balanceField);
+
       const updated = await prismaClient.user.update({
         where: { id: userId },
         data: {
           [balanceField]: (request_data.balance - request_data.no_of_keyword),
-      },
-    });
-    if(updated){
-      return NextResponse.json({ status: 'success' });
-    }else{
-      return NextResponse.json({ status: 'failure' });
+        },
+      });
+      if(updated){
+        return NextResponse.json({ status: 'success' });
+      }else{
+        return NextResponse.json({ status: 'failure' });
+      }
     }
+
+    if(request_data.type === 'article_upadte'){
+      if (!request_data.id || typeof request_data.id !== "string") {
+        return NextResponse.json({ error: "Invalid article id" }, { status: 400 });
+      }
+  
+      if (request_data.content !== undefined && typeof request_data.content !== "string") {
+        return NextResponse.json({ error: "Invalid article text" }, { status: 400 });
+      }
+  
+      const updatedTodo = await prismaClient.articles.update({
+        where: { id: request_data.id },
+        data: {
+          content: request_data.content
+        },
+      });
+  
+      return NextResponse.json({ todo: updatedTodo });
     }
+
   } catch (error) {
     console.error("Error updating", error);
     return NextResponse.json(

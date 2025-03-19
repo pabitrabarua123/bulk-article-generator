@@ -4,8 +4,8 @@ import { Metadata } from "next";
 import Login from "@/components/pages/Login/Login";
 
 export const metadata: Metadata = getSEOTags({
-  title: `Login | ${brandName}`,
-  description: `Login to your ${brandName} account`,
+  title: 'Login | Bulk Article Generator',
+  description: `Login to your account`,
 });
 
 const LoginPage = () => {
