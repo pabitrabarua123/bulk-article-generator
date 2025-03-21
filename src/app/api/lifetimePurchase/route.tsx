@@ -33,8 +33,8 @@ try{
     line_items: [{ price: priceId, quantity: 1 }],
     mode: "payment",
     customer_email: session.user.email,
-    success_url: process.env.STRIPE_SUCCESS_URL, 
-    cancel_url: process.env.STRIPE_CANCEL_URL,
+    success_url: `https://bulk-article-generator.vercel.app/article-generator?payment=success&type=lifetime&plan=${name}`, 
+    cancel_url: 'https://bulk-article-generator.vercel.app/article-generator?payment=failed',
   });
   return NextResponse.json({ url: session1.url });
 }catch(error:any){

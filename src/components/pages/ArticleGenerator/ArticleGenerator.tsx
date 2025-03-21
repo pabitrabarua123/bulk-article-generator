@@ -36,17 +36,22 @@ const ArticleGenerator: React.FC = () => {
   const router = useRouter();
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = React.useState(false);
   //const [todoToEdit, setTodoToEdit] = React.useState<Todo | null>(null);
+  
   const searchParams = useSearchParams();
   const param = searchParams.get("payment"); 
-  
-  const [toastShown, setToastShown] = useState(false);
-
   useEffect(() => {
-    if (param === 'success' && !toastShown) {
-      toast.success(`You have been successfully upgraded to "Pro Monthly Plan"`);
-      setToastShown(true);
+    if(param === 'success') {
+      const type = searchParams.get("type");
+      const plan = searchParams.get("plan");
+      if(type === 'subscription'){
+        toast.success(`You have been successfully upgraded to "${plan} Monthly Plan"`);
+      }else{
+        toast.success(`You have been successfully upgraded to "${plan} Lifetime Plan"`);
+      }
+    }else if(param === 'failed'){
+      toast.success("Your Payment has failed (Please Try again)");
     }
-  }, [param, toastShown]);
+  }, [param]);
 
   const spinnerColor = useColorModeValue("blackAlpha.300", "whiteAlpha.300");
 
@@ -540,13 +545,13 @@ const PricingPopup: React.FC<PricingPopupProps> = ({ isOpen, onClose, activeTab,
     setActiveTab(tab);
   };
 
-  const payStripeSubscription = async (priceId: string) => {
+  const payStripeSubscription = async (priceId: string, name: string) => {
     setProcessingPlan(priceId);
     try {
       const response = await fetch("/api/subscriptions/stripe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId }), 
+        body: JSON.stringify({ priceId, name }), 
       });
 
       if (!response.ok) throw new Error(`Error: ${response.status}`);
@@ -558,13 +563,13 @@ const PricingPopup: React.FC<PricingPopupProps> = ({ isOpen, onClose, activeTab,
     }
   }; 
 
-  const payStripeLifetime = async (priceId: string) => {
+  const payStripeLifetime = async (priceId: string, name: string) => {
     setProcessingPlan(priceId);
     try {
       const response = await fetch("/api/lifetimePurchase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId }), 
+        body: JSON.stringify({ priceId, name }), 
       });
 
       if (!response.ok) throw new Error(`Error: ${response.status}`);
@@ -658,7 +663,7 @@ const PricingPopup: React.FC<PricingPopupProps> = ({ isOpen, onClose, activeTab,
     : null}
 </ul>
     <button  
-      onClick={() => payStripeSubscription(plan.priceId)} 
+      onClick={() => payStripeSubscription(plan.priceId, plan.name)} 
       className="absolute bottom-6 left-6 right-6 bg-[#33d6e2] text-[#141824] border-none rounded-lg py-3 font-semibold cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all duration-200"
       disabled={processingPlan === plan.priceId}
     >
@@ -705,7 +710,7 @@ const PricingPopup: React.FC<PricingPopupProps> = ({ isOpen, onClose, activeTab,
     : null}
 </ul>
    <button  
-      onClick={() => payStripeLifetime(plan.priceId)} 
+      onClick={() => payStripeLifetime(plan.priceId, plan.name)} 
       className="absolute bottom-6 left-6 right-6 bg-[#33d6e2] text-[#141824] border-none rounded-lg py-3 font-semibold cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all duration-200"
       disabled={processingPlan === plan.priceId}
     >

@@ -26,15 +26,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const { priceId } = await request.json();
+const { priceId, name } = await request.json();
+
 try{
   let session1:any = await stripeClient.checkout.sessions.create({
     billing_address_collection: "auto",
     line_items: [{ price: priceId, quantity: 1 }],
     mode: "subscription",
     customer_email: session.user.email,
-    success_url: process.env.STRIPE_SUCCESS_URL, 
-    cancel_url: process.env.STRIPE_CANCEL_URL,
+    success_url: `https://bulk-article-generator.vercel.app/article-generator?payment=success&type=subscription&plan=${name}`, 
+    cancel_url: 'https://bulk-article-generator.vercel.app/article-generator?payment=failed',
   });
   return NextResponse.json({ url: session1.url });
 }catch(error:any){
