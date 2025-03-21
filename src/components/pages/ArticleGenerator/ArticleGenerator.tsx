@@ -9,7 +9,9 @@ import {
   Input,
   Textarea,
   Switch,
-  Box
+  Box,
+  Spinner,
+  useColorModeValue
 } from "@chakra-ui/react";
 import {
   TbPlus
@@ -27,13 +29,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 //import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ArticleGenerator: React.FC = () => {
   
   const router = useRouter();
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = React.useState(false);
   //const [todoToEdit, setTodoToEdit] = React.useState<Todo | null>(null);
+  const searchParams = useSearchParams();
+  const param = searchParams.get("payment"); 
+  
+  const [toastShown, setToastShown] = useState(false);
+
+  useEffect(() => {
+    if (param === 'success' && !toastShown) {
+      toast.success(`You have been successfully upgraded to "Pro Monthly Plan"`);
+      setToastShown(true);
+    }
+  }, [param, toastShown]);
+
+  const spinnerColor = useColorModeValue("blackAlpha.300", "whiteAlpha.300");
 
   const {
       data: userData,
@@ -178,7 +193,7 @@ const ArticleGenerator: React.FC = () => {
    setIsTimerPopupOpen(false);
   };
 
-  const [isGodMode, setIsGodMode] = useState<boolean>(false);
+  const [isGodMode, setIsGodMode] = useState<boolean>(true);
   const toggleMode = () => {
     setIsGodMode(!isGodMode);
   };
@@ -242,16 +257,25 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
   
 {isGodMode && (
 <Flex direction="column" alignItems="flex-end">
+  { isLoading ?
+  <Spinner size="xs" color={spinnerColor} mr="16px" /> 
+  :
+  <>
   <Text fontSize="sm" color="gray.600">{balance.balance_text}: {balance.credits}</Text>
+  { user && user?.monthyBalance === 0 && user && user?.lifetimeBalance === 0 &&
   <Text
-    fontSize="sm"
-    color="blue.500"
-    textDecoration="underline"
-    onClick={openPricingPopup}
-    cursor="pointer"
+  fontSize="sm"
+  color="blue.500"
+  textDecoration="underline"
+  onClick={openPricingPopup}
+  cursor="pointer"
   >
     Buy more credits
   </Text>
+  }
+  </>
+}
+
 </Flex>
   )}
 </Flex>
@@ -269,7 +293,12 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
     Change Prompt
   </Button>
   <Text fontSize="sm" color="gray.600">
+    { isLoading ? <Spinner size="xs" color={spinnerColor} mr="16px" /> 
+    : 
+    <>
     {balance.balance_text}: {balance.credits}{ user && user?.LiteModeBalance > 0 ? '' : '/30'}
+    </>
+    }
   </Text>
 </Flex>
 )}

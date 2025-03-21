@@ -150,11 +150,11 @@ const ArticlesList: React.FC = () => {
 
   const columns = [
     columnHelper.accessor("keyword", {
-      cell: (info) => (
+      cell: ({ row }) => (
         <Text
           size="sm"
           border="none"
-        >{info.getValue()}</Text>
+        ><a href={`/articles/${row.original.id}`}>{row.original.keyword}</a></Text>
       ),
       header: "Keyword",
     }),

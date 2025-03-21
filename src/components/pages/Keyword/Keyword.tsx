@@ -20,6 +20,7 @@ import { Articles } from "@prisma/client";
 import { queryClient } from "@/app/providers";
 import { useRouter } from "next/navigation";
 import { HStack, Stack, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
+import Link from 'next/link';
 
 const Keyword = ({id}: {id: string}) => {
   
@@ -127,11 +128,13 @@ const Keyword = ({id}: {id: string}) => {
         <Heading size="md">
         <TbArrowBackUp style={{display: 'inline-block', cursor: 'pointer'}} className="mr-3 h-5 w-5" onClick={() => router.push('/articles')}/>
          {todos.map((article: any) => (
-            <b key={article.id}>{article.keyword}</b>
+          <Link key={article.id} href={`/articles/${article.id}`}>
+             {article.keyword}
+          </Link>
           ))}
         </Heading>
         <Text className="text-slate-500 text-sm">
-          <b>{todos[0].batch}</b> / {todos[0].keyword} 
+          <Link href={`/articles?batch=${todos[0].batch}`}>{todos[0].batch}</Link> / {todos[0].keyword} 
         </Text>
         <div className="rounded-md w-full">
             <div>
