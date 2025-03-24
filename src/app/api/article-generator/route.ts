@@ -100,7 +100,7 @@ export async function POST(request: Request) {
         aiResponse = await response.text();
         console.log(aiResponse); // I console the value as "Accepted"
     }else{
-      let content = prompt.replace('KEYWORD', text);
+      let content = prompt.replace('{KEYWORD}', text);
       // Send keyword to OpenAI
       const response = await openai.chat.completions.create({
         model: "gpt-4", // Use GPT-4 or another model

@@ -245,7 +245,7 @@ export const SidebarMenuItems: React.FC<MenuProps> = ({
           onClick={onMenuItemClick}
           loadingRoute={loadingRoute}
         >
-          <TbChecklist size="16px" /> &nbsp;<MenuLabel>Account</MenuLabel>
+          <TbUsers size="16px" /> &nbsp;<MenuLabel>Account</MenuLabel>
         </MenuItem>
 
         <Text

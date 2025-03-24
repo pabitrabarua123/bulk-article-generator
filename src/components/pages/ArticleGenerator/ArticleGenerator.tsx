@@ -86,7 +86,7 @@ const ArticleGenerator: React.FC = () => {
   
   const [text, setText] = useState('');
   const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
-  const [prompt, setPrompt] = useState("Write a detailed and information-dense and seo optimized article in English for the keyword KEYWORD in the style of Ernest Hemingway in html. using clear, language without unnecessary grandiose or exaggerations for newspaper. Get to the point, and avoid overly complex or flowery phrasing. Don't use the most natural words. Use the words unique, ensure and utmost less than 3 times. Write article with subheadings formatted in HTML without head or title.");
+  const [prompt, setPrompt] = useState("Write a detailed and information-dense and seo optimized article in English for the keyword {KEYWORD} in the style of Ernest Hemingway in html. using clear, language without unnecessary grandiose or exaggerations for newspaper. Get to the point, and avoid overly complex or flowery phrasing. Don't use the most natural words. Use the words unique, ensure and utmost less than 3 times. Write article with subheadings formatted in HTML without head or title.");
   const batchRef = useRef("");
   const handleBatchChange = (val: string) => {
     batchRef.current = val; // No re-render happens
@@ -127,6 +127,10 @@ const ArticleGenerator: React.FC = () => {
        toast.error("Keywords Length is greater than the balance");
        return;
     }
+    if(keywords.length === 0){
+       toast.error("Please enter Keywords");
+      return;
+   }
     setIsProcessing(true);
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + 0.3, 95)); // Slow continuous progress
@@ -481,7 +485,7 @@ const EditPromptDialog = ({
         <DialogHeader>
           <DialogTitle>Edit Prompt</DialogTitle>
           <DialogDescription>
-            Update your prompt, do not chnage KEYWORD.
+            Update your prompt. Please do not remove the variable &#123;KEYWORD&#125;
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
