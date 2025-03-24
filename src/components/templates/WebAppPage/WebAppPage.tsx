@@ -5,6 +5,7 @@ import { Dashboard } from "@/components/pages/Dashboard/Dashboard";
 import Todo from "@/components/pages/Todo/Todo";
 import ArticleGenerator from "@/components/pages/ArticleGenerator/ArticleGenerator";
 import Articles from "@/components/pages/Articles/Articles";
+import Batch from "@/components/pages/Batch/Batch";
 import { Routes } from "@/data/routes";
 import { useMobile } from "@/hooks/useMobile";
 import {
@@ -25,6 +26,7 @@ import {
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { TbMenu2 } from "react-icons/tb";
+import { Account } from "@/components/pages/Account/Account";
 
 type WebAppPageProps = {
   currentPage: Routes;
@@ -125,7 +127,17 @@ export const WebAppPage = ({ currentPage }: WebAppPageProps) => {
               <Center w="100%" flexDir="column">
                 <Articles />
               </Center>
+            )}
+            {currentPage === Routes.account && (
+              <Center w="100%" flexDir="column">
+                <Account />
+              </Center>
             )} 
+            {currentPage === Routes.batch && (
+              <Center w="100%" flexDir="column">
+                <Batch />
+              </Center>
+            )}  
             {/* Add the route components here */}
           </Flex>
         </>

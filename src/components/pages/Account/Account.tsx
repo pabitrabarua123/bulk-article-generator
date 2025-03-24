@@ -2,9 +2,7 @@
 
 import { Metadata } from "next";
 
-import { CalendarDateRangePicker } from "./components/date-range-picker";
-import { Overview } from "./components/overview";
-import { RecentSales } from "./components/recent-sales";
+
 import { Search } from "./components/search";
 import TeamSwitcher from "./components/team-switcher";
 import { UserNav } from "./components/user-nav";
@@ -19,8 +17,9 @@ import { Button, Flex, Skeleton } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { DashboardData } from "@/app/api/dashboard/route";
-import { TrendChart } from "./components/trend-chart";
-import { Articles } from "@prisma/client";
+import { User } from "@prisma/client";
+import { paymentProvider } from "@/config";
+import toast from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -35,39 +34,67 @@ export const metadata: Metadata = {
   https://ui.shadcn.com/charts
 */
 
-export const Dashboard = () => {
-  const { data, isLoading } = useQuery({
-    queryFn: () => {
-      return axios.get<{ data: DashboardData }>("/api/dashboard");
-    },
-    queryKey: ["dashboard"],
-  });
+export const Account = () => {
 
-  const chartData = data?.data.data.charts || [];
-  const trendData = data?.data.data.trend || [];
-  const revenue = data?.data.data.revenue;
-  const subscriptions = data?.data.data.subscriptions;
-  const orders = data?.data.data.orders;
-  const activeNow = data?.data.data.activeNow;
+    const {
+        data: userData,
+        isLoading,
+        error,
+      } = useQuery({
+        queryKey: ["user"],
+        queryFn: async () => {
+          const response = await fetch('/api/user');
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json() as Promise<{
+            user: User;
+          }>;
+        },
+        enabled: true,
+    });
+    const user = userData?.user ?? null;
+    console.log(user);
 
-  const {
-    data: articleData,
-    isLoading: articleLoading,
-    error,
-  } = useQuery({
-    queryKey: ["todos"],
-    queryFn: async () => {
-      const response = await fetch(`/api/article-generator`);
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json() as Promise<{
-        todos: (Omit<Articles, "updatedAt"> & { updatedAt: string })[];
-      }>;
-    }
-  });
+    const {
+        data: planData,
+        isLoading: planLoading,
+        error: planError,
+      } = useQuery({
+        queryKey: ["plans"],
+        queryFn: async () => {
+          const response = await fetch('/api/account');
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        },
+        enabled: true,
+    });
+    
+    console.log(planData);
 
-  console.log(articleData);
+    const getStripeCustomerPortalUrl = async () => {
+        const response = await axios.get("/api/stripe/customer-portal");
+        return response?.data?.url;
+      };
+      
+     const onLoadCustomerPortal = async () => {
+        try {
+      
+          if (paymentProvider === "stripe") {
+            const url = await getStripeCustomerPortalUrl();
+            if (url) {
+              window.open(url, "_blank");
+              return;
+            }
+          }
+      
+          toast.error("You don't have an active subscription");
+        } catch (error) {
+          toast.error("You don't have an active subscription");
+        }
+      };
 
   return (
     <>
@@ -84,19 +111,13 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex sm:items-center justify-between space-y-2 flex-col sm:flex-row">
-              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-              <div className="flex items-center space-x-2">
-                <CalendarDateRangePicker />
-                <Button colorScheme="brand">Download</Button>
-              </div>
-            </div>
+            
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                  God Mode Articles
+                  Daily Balance
                   </CardTitle>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -117,7 +138,7 @@ export const Dashboard = () => {
                 <CardContent>
                   <Skeleton isLoaded={!isLoading}>
                     <div className="text-2xl font-bold">
-                      {revenue?.value || 0}
+                      { user && user?.dailyBalance && user.dailyBalance}/30
                     </div>
                   </Skeleton>
                   {/* <Skeleton isLoaded={!isLoading} mt="2px">
@@ -131,7 +152,7 @@ export const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                   Lite Mode Articles
+                   Lite Mode Balance
                   </CardTitle>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -152,7 +173,7 @@ export const Dashboard = () => {
                 <CardContent>
                   <Skeleton isLoaded={!isLoading}>
                     <div className="text-2xl font-bold">
-                      {subscriptions?.value || 0}
+                    { user && user?.LiteModeBalance && user.LiteModeBalance }
                     </div>
                   </Skeleton>
                   {/* <Skeleton isLoaded={!isLoading} mt="2px">
@@ -165,7 +186,7 @@ export const Dashboard = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Member Age</CardTitle>
+                  <CardTitle className="text-sm font-medium">God Mode Balance</CardTitle>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -184,7 +205,7 @@ export const Dashboard = () => {
                 <CardContent>
                   <Skeleton isLoaded={!isLoading}>
                     <div className="text-2xl font-bold">
-                      {orders?.value || 0}
+                    { user && user?.monthyBalance > 0 ? <p>{user.monthyBalance} <span className="text-sm text-gray-500">Monthly</span></p> : user && user?.lifetimeBalance > 0 ? user.lifetimeBalance : 0}
                     </div>
                   </Skeleton>
                   {/* <Skeleton isLoaded={!isLoading} mt="2px">
@@ -194,88 +215,36 @@ export const Dashboard = () => {
                   </Skeleton> */}
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                  Batches
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                   <rect x="2" y="2" width="18" height="18" rx="2" />
-                   <rect x="6" y="6" width="18" height="18" rx="2" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <Skeleton isLoaded={!isLoading}>
-                    <div className="text-2xl font-bold">
-                      {activeNow?.value || 0}
-                    </div>
-                  </Skeleton>
-                  {/* <Skeleton isLoaded={!isLoading} mt="2px">
-                    <p className="text-xs text-muted-foreground">
-                      {activeNow?.increase} since last hour
-                    </p>
-                  </Skeleton> */}
-                </CardContent>
-              </Card>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
-                <CardHeader>
-                  <CardTitle>Generations</CardTitle>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <Skeleton isLoaded={!isLoading} borderRadius="8px">
-                    <Overview data={chartData} />
-                  </Skeleton>
-                </CardContent>
-              </Card>
+              
               <Card className="col-span-3">
                 <CardHeader>
-                  <CardTitle>Recent Articles</CardTitle>
-                  <CardDescription>
-                    You made total {articleData && articleData.todos.length} keywords.
-                  </CardDescription>
+                  <CardTitle>Current Plan(s)</CardTitle>  
+                  { planLoading && <Skeleton height="150" width="100%" mt="30px"/>}
+                  { !planLoading &&
+                  <div>
+                    { planData?.SubscriptionPlan && (
+                        <>
+                          <div className="text-xl mt-[10px]">{planData.SubscriptionDetails.name} Monthly Plan - <small>{planData.SubscriptionDetails.price}USD/Month</small></div>
+                          <CardDescription>
+                           <ul className="mt-[10px] pl-[20px]">
+                            { JSON.parse(planData.SubscriptionDetails.features).map((feature:string, index:number) => 
+                              (<li key={index}>{feature}</li>)
+                            )}
+                           </ul>
+                           </CardDescription>
+                           <button className="mt-[30px] bg-[#33d6e2] text-[#141824] border-none rounded-lg py-2 px-3 font-semibold cursor-pointer" onClick={() => onLoadCustomerPortal()}>Cancel plan</button>
+                        </>
+                     )
+                     }
+                   </div>
+                   }
                 </CardHeader>
-                <CardContent>
-                  <Skeleton isLoaded={!isLoading} borderRadius="8px">
-                  <div className="space-y-8">
-                  {articleData && articleData.todos.slice(0, 7).map((article: { id: string, keyword: string; content: string }, index: number) => (
-  <div className="flex items-center" key={index}>
-    <div className="ml-4 space-y-1">
-      <p className="text-sm font-medium leading-none">
-       <a href={`/articles/${article.id}`}>{article.keyword}</a>
-      </p>
-    </div>
-  </div>
-))}
-                  </div>
-                  </Skeleton>
-                </CardContent>
+                
               </Card>
             </div>
 
-            {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-7">
-                <CardHeader>
-                  <CardTitle>Sales</CardTitle>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <Skeleton isLoaded={!isLoading} borderRadius="8px">
-                    <TrendChart data={trendData} />
-                  </Skeleton>
-                </CardContent>
-              </Card>
-            </div> */}
           </div>
         </div>
       </Flex>

@@ -6,19 +6,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 export type DashboardData = {
   revenue: {
-    value: string;
+    value: number;
     increase: string;
   };
   subscriptions: {
-    value: string;
+    value: number;
     increase: string;
   };
   orders: {
-    value: string;
+    value: number;
     increase: string;
   };
   activeNow: {
-    value: string;
+    value: number;
     increase: string;
   };
   charts: {
@@ -42,79 +42,88 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch dashboard data here
-    // For example:
-    /*
-    const sales = await prismaClient.sales.findMany();
-    */
+    const godmodeCount = await prismaClient.articles.count({
+      where: { userId: session?.user?.id, articleType: 'godmode' }
+    });
+    
+    const litemodeCount = await prismaClient.articles.count({
+      where: { userId: session?.user?.id, articleType: 'litemode' }
+    });
 
-    // You can add more queries to fetch additional dashboard data
+    const uniqueBatches = await prismaClient.articles.groupBy({
+      by: ['batch'],
+      where: { userId: session?.user?.id }
+    });
+
+    const articles = await prismaClient.articles.count({
+      where: { userId: session?.user?.id }
+    });
 
     const data: DashboardData = {
       revenue: {
-        value: "45,231.93",
+        value: godmodeCount,
         increase: "+20.1%",
       },
       subscriptions: {
-        value: "+2,351",
+        value: litemodeCount,
         increase: "+180%",
       },
       orders: {
-        value: "+12,236",
+        value: 34,
         increase: "+19%",
       },
       activeNow: {
-        value: "+578",
+        value: uniqueBatches.length,
         increase: "+201",
       },
       charts: [
         {
           name: "Jan",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Feb",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Mar",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: articles,
         },
         {
           name: "Apr",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "May",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Jun",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Jul",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Aug",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Sep",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Oct",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Nov",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
         {
           name: "Dec",
-          total: Math.floor(Math.random() * 5000) + 1000,
+          total: 0,
         },
       ],
       trend: [

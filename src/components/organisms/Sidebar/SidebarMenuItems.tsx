@@ -231,12 +231,21 @@ export const SidebarMenuItems: React.FC<MenuProps> = ({
         </MenuItem>
 
         <MenuItem
-          route={Routes.articles}
+          route={Routes.batch}
           currentPage={currentPage}
           onClick={onMenuItemClick}
           loadingRoute={loadingRoute}
         >
           <TbChecklist size="16px" /> &nbsp;<MenuLabel>Articles</MenuLabel>
+        </MenuItem>
+
+        <MenuItem
+          route={Routes.account}
+          currentPage={currentPage}
+          onClick={onMenuItemClick}
+          loadingRoute={loadingRoute}
+        >
+          <TbChecklist size="16px" /> &nbsp;<MenuLabel>Account</MenuLabel>
         </MenuItem>
 
         <Text
@@ -251,7 +260,7 @@ export const SidebarMenuItems: React.FC<MenuProps> = ({
           Resources
         </Text>
         <MenuItem
-          route={`/#pricing`}
+          route={`/pricing`}
           currentPage={currentPage}
           isExternal
           onClick={onMenuItemClick}

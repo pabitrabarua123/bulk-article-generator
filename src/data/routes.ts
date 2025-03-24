@@ -10,5 +10,7 @@ export enum Routes {
   terms = "/terms",
   todo = "/todo",
   articlegenerator = "/article-generator",
-  articles = "/articles"
+  articles = "/articles",
+  account = "/account",
+  batch = "/batch"
 }

@@ -1,6 +1,6 @@
-export const brandName = "My App";
-export const landingPageTitle = "My App";
-export const landingPageDescription = "Make money today with My App";
+export const brandName = "Bulk Article Generator";
+export const landingPageTitle = "Bulk Article Generator";
+export const landingPageDescription = "Generate Articles with Keyword";
 
 /* 
 Only if you are using Supabase for authentication

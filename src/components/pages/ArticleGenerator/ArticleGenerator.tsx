@@ -136,7 +136,7 @@ const ArticleGenerator: React.FC = () => {
       setCurrentKeyword(keywords[i]);
       try {
         await generateArticle.mutateAsync({
-          batch: batchRef.current !== "" ? batchRef.current : "Untitled",
+          batch: batchRef.current !== "" ? batchRef.current : "Batch_" + Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
           text: keywords[i],
           prompt: prompt,
           is_godmode: isGodMode,
@@ -238,7 +238,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
     }
   });
 
-  //const [countdown, setCountdown] = useState(""); 
+  //console.log(productData);
 
   return (
     <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">
@@ -266,7 +266,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
   <Spinner size="xs" color={spinnerColor} mr="16px" /> 
   :
   <>
-  <Text fontSize="sm" color="gray.600">{balance.balance_text}: {balance.credits}</Text>
+  <Text fontSize="sm" color="gray.600">{balance.balance_text}: {balance.credits} Articles</Text>
   { user && user?.monthyBalance === 0 && user && user?.lifetimeBalance === 0 &&
   <Text
   fontSize="sm"
@@ -301,7 +301,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
     { isLoading ? <Spinner size="xs" color={spinnerColor} mr="16px" /> 
     : 
     <>
-    {balance.balance_text}: {balance.credits}{ user && user?.LiteModeBalance > 0 ? '' : '/30'}
+    {balance.balance_text}: {balance.credits + ' Articles'}{ user && user?.LiteModeBalance > 0 ? '' : '/30 Articles'}
     </>
     }
   </Text>
