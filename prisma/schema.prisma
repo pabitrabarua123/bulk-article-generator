@@ -185,3 +185,18 @@ model Articles {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model GodmodeArticles {
+  id              String   @id @default(cuid())
+  userId          String
+  keyword         String
+  content         String?
+  featuredImage   String?
+  svgUrl          String?
+  metaTitle       String?
+  metaDescription String?
+  batch           String
+  articleType     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

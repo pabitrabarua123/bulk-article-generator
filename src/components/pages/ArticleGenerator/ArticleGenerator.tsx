@@ -374,7 +374,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
             disabled={isProcessing}          >
             {isProcessing ? 'Generating...' : 'Generate'}
           </Button>
-{isProcessing &&
+{isProcessing && !isGodMode &&
     <div style={{ width: "100%", marginTop: '20px' }}>
     {/* <h3>{isProcessing ? `Processing: ${currentKeyword}` : "All keywords processed!"}</h3> */}
     <div style={{ width: "100%", backgroundColor: "#f0f0f0", borderRadius: "10px" }}>

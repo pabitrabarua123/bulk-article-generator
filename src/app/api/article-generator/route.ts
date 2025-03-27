@@ -43,6 +43,25 @@ export async function GET(req: NextRequest) {
 
     let todos;
 
+    const apiKey = 'eba4efa4329d5a3f04ac97da55e511bd5494f16b';
+    const docId = 'jVZEuLye9YFSWQ1jHVQ5UT';
+    const tableId = 'Table1';
+    const articleId = 498;
+
+    // Fetch data from Grist API
+    const response = await fetch(`https://docs.getgrist.com/api/docs/${docId}/tables/${tableId}/records?filter=id==${articleId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      }
+    });
+
+    const data = await response.json();
+    const article = data.records && data.records[0];
+
+    console.log(article);
+
     if (id) {
       // Fetch a single article by ID for the logged-in user
       const article = await getArticleById(userId, id);
@@ -73,7 +92,13 @@ const openai = new OpenAI({
 });
 
 export async function POST(request: Request) {
+  
   const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const userId = session?.user.id as string;
+  
   try {
     const {batch, text, prompt, is_godmode} = await request.json();
     if (!text || typeof text !== "string") {
@@ -81,9 +106,20 @@ export async function POST(request: Request) {
     }
     let aiResponse = '';
     if(is_godmode){
-        console.log(text);
+        let article = await prismaClient.godmodeArticles.create({
+          data: {
+            userId,
+            batch: batch,
+            keyword: text,
+            articleType: 'godmode'
+          },
+        });
+
+       // console.log(article);
+       // console.log(text);
         const params = new URLSearchParams();
         params.append('keyword', text);
+        params.append('id', article.id);
         params.append('comment', '.'); // or any value you want to send
         params.append('featured_image_required', 'No');
         params.append('additional_image_required', 'No');
@@ -99,6 +135,7 @@ export async function POST(request: Request) {
 
         aiResponse = await response.text();
         console.log(aiResponse); // I console the value as "Accepted"
+        return NextResponse.json({ status: 200, aiResponse });
     }else{
       let content = prompt.replace('{KEYWORD}', text);
       // Send keyword to OpenAI
@@ -108,19 +145,17 @@ export async function POST(request: Request) {
         temperature: 0.7,
       });
       aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
+      await prismaClient.articles.create({
+        data: {
+          userId,
+          content: aiResponse,
+          batch: batch,
+          keyword: text
+        },
+      });
+  
+      return NextResponse.json({ status: 200, aiResponse });
     }
-
-    const userId = session?.user.id as string;
-    const newArticle = await prismaClient.articles.create({
-      data: {
-        userId,
-        content: aiResponse,
-        batch: batch,
-        keyword: text
-      },
-    });
-
-    return NextResponse.json({ status: 200, aiResponse });
 
   } catch (error) {
     console.error("Error creating article:", error);
