@@ -337,7 +337,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
         </svg>
       </Box>
       <Text color="white" fontSize="xs">
-        Get ready to get insane quality articles made after SERP Analysis, LSI Keywords, Competitor analysis, Deep research and understanding
+        Get ready to11 get insane quality articles made after SERP Analysis, LSI Keywords, Competitor analysis, Deep research and understanding
       </Text>
       <Box 
         position="absolute" 
