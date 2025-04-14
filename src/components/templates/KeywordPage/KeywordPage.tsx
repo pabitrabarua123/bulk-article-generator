@@ -32,87 +32,47 @@ export const KeywordPage = ({ currentPage, id}: KeywordPageProps) => {
     console.log(id)
   const isMobile = useMobile();
   const { data: session, status } = useSession();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const buttonColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
-  const buttonColorScheme = useColorModeValue("blackAlpha", "whiteAlpha");
 
   return (
-    <Center minH="100vh">
-      {status === "loading" && <Spinner color="brand.500" />}
-      {status === "unauthenticated" && (
+    <>
+     {status === "loading" && 
+      <Center minH="100vh">
+       <Spinner color="brand.500" />
+      </Center>
+     }
+     
+     {status === "unauthenticated" && (
+      <Center minH="100vh">
         <Stack>
           <Text>Sign in to access</Text>
           <Button as="a" href="/login" colorScheme="brand">
             Sign in
           </Button>
         </Stack>
+        </Center>
       )}
-      {status === "authenticated" && (
-        <>
-          {isMobile && (
-            <Flex
-              boxShadow="sm"
-              w="100vw"
-              alignItems="flex-start"
-              justifyContent="start"
-              position="fixed"
-              top="0"
-              left="0"
-              p="8px"
-            >
-              <IconButton
-                icon={<TbMenu2 />}
-                aria-label={"menu"}
-                variant="ghost"
-                colorScheme={buttonColorScheme}
-                color={buttonColor}
-                mr="8px"
-                size="sm"
-                onClick={onOpen}
-              />
-            </Flex>
-          )}
-          <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="xs">
-            <DrawerOverlay />
-            <DrawerContent w={sidebarWidth} maxW={sidebarWidth}>
-              <DrawerCloseButton
-                colorScheme={buttonColorScheme}
-                color={buttonColor}
-                size="sm"
-                zIndex="1000"
-                position="fixed"
-              />
 
-              <DrawerBody>
-                <SideBar currentPage={currentPage} />
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-          {!isMobile && <SideBar currentPage={currentPage} />}
+      {status === "authenticated" && (
           <Flex
             minW="100vw"
             w="100vw"
             minH="100vh"
             margin="0"
             padding="0"
-            pt={isMobile ? "48px" : "0"}
+            pt="20px"
+            pl="20px"
+            pr="20px"
+            pb="20px"
             flexGrow={1}
             justifyContent="flex-start"
-            pl={isMobile ? 0 : sidebarWidth}
             style={{
               marginInlineStart: "0",
               marginInlineEnd: "0",
             }}
           >
-            <Center w="100%" flexDir="column">
-                <Keyword id={id} />
-              </Center>
-            
-            {/* Add the route components here */}
+            <Keyword id={id} /> 
           </Flex>
-        </>
       )}
-    </Center>
+    </>
   );
 };

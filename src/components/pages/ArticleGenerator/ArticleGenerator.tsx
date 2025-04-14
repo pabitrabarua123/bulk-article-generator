@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 //import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
+import GodmodeLoader from "./GodmodeLoader";
 
 const ArticleGenerator: React.FC = () => {
   
@@ -73,7 +74,7 @@ const ArticleGenerator: React.FC = () => {
       enabled: true,
   });
   const user = userData?.user ?? null;
-  console.log(user);
+ // console.log(user);
 
   const openPromptDialog = () => {
     setIsEditPromptDialogOpen(true);
@@ -131,6 +132,11 @@ const ArticleGenerator: React.FC = () => {
        toast.error("Please enter Keywords");
       return;
    }
+   if(keywords.length > 10) {
+    toast.error("Maximum allowed Keywords(10) exceeds!");
+    return;
+   }
+
     setIsProcessing(true);
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + 0.3, 95)); // Slow continuous progress
@@ -159,6 +165,117 @@ const ArticleGenerator: React.FC = () => {
     router.push(`/articles?batch=${batchRef.current}`);
     console.log("All requests finished!");
   };
+
+  const godModeArticleIds = useRef<string[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [godmodeArticlePrepared, setGodmodeArticlePrepared] = useState([]);
+  const [godmodeArticleRemain, setGodmodeArticleRemain] = useState(0);
+  const [isProcessingGodmode, setIsProcessingGodmode] = useState(false);
+  const [progressGodmode, setProgressGodmode] = useState(0);
+  const [GodModeLoader, setGodModeLoader] = useState(false);
+  const redirectReadyRef = useRef(false);
+
+  const sendKeywordsSequentiallyGodmode = async (keywords: string[]) => {
+    if (balance.credits == 0) {
+      openTimerPopup();
+      return;
+    }
+    if (keywords.length > balance.credits) {
+      toast.error("Keywords Length is greater than the balance");
+      return;
+    }
+    if (keywords.length === 0) {
+      toast.error("Please enter Keywords");
+      return;
+    }
+    if (keywords.length > 10) {
+      toast.error("Maximum allowed Keywords(10) exceeds!");
+      return;
+    }
+  
+    setIsProcessingGodmode(true);
+    setGodModeLoader(true);
+    start25MinLoader(); // 🔥 Start the 25-min loader here
+  
+    for (let i = 0; i < keywords.length; i++) {
+      setCurrentKeyword(keywords[i]);
+      try {
+        let res = await generateArticle.mutateAsync({
+          batch:
+            batchRef.current !== ""
+              ? batchRef.current
+              : "Batch_" + Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
+          text: keywords[i],
+          prompt: prompt,
+          is_godmode: isGodMode,
+        });
+        // console.log(res.article);
+         godModeArticleIds.current[i] = res.article.id;
+      } catch (error) {
+        console.error(`Error processing keyword "${keywords[i]}":`, error);
+        toast.error(`Error creating article for the keyword: "${keywords[i]}"`);
+      }
+    }
+    console.log(godModeArticleIds.current);
+    //setIsProcessing(false); // loop done, but loader continues independently
+    updateBalance(keywords.length);
+  };
+
+  const start25MinLoader = () => {
+    setProgressGodmode(0); // reset
+    const duration = 120; // 1500 seconds
+    let secondsPassed = 0;
+    let apiCalled = false; // ensure it's called only once
+  
+    if (timerRef.current) clearInterval(timerRef.current);
+  
+    timerRef.current = setInterval(() => {
+      secondsPassed++;
+      const percent = (secondsPassed / duration) * 100;
+      setProgressGodmode(percent);
+  
+      const remaining = duration - secondsPassed;
+  
+      // Trigger API call when 60 seconds or less remain
+      if (remaining <= 10 && !apiCalled) {
+        apiCalled = true;
+        checkArticlePrepared();
+      }
+  
+      if (secondsPassed >= duration) {
+        setGodModeLoader(false);
+        clearInterval(timerRef.current!);
+        redirectReadyRef.current = true;
+      }
+    }, 1000); // update every second
+  };
+  
+  const checkArticlePrepared = () => {
+    fetch("/api/article-generator/check-godmode-completion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({keywords: godModeArticleIds.current}),
+    }).then(response => response.json())
+      .then(data => {
+        console.log(data.res);
+         if(data.res === 'Partial'){
+           setGodmodeArticlePrepared(data.contentFilledKeywords);
+           setGodmodeArticleRemain(data.remainingKeywords);
+         }
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  useEffect(() => {
+    if (redirectReadyRef.current && godmodeArticleRemain === 0 && !GodModeLoader) {
+      setTimeout(() => {
+        router.push(`/articles?batch=${batchRef.current}`);
+      }, 3000);
+    }
+  }, [godmodeArticleRemain, GodModeLoader]);
+  
 
   const updateBalance = async (no_of_keyword: number) => {
     await fetch("/api/article-generator", {
@@ -316,7 +433,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
             placeholder="Batch name (Optional)"
             defaultValue={batchRef.current}
             onChange={(e) => handleBatchChange(e.target.value)}
-            className="rounded-md w-1/2 flex-grow"
+            className="rounded-md w-1/2 flex-grow text-slate-500"
           />
         </div>
 
@@ -324,11 +441,10 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
   <Box 
     position="relative"
     width="100%" 
-    bg="#1A202C" 
     borderRadius="md"
     p={2}
     mb={1}
-    border="1px dashed rgba(255, 255, 255, 0.2)"
+    border="1px dashed rgba(255, 255, 255, 0.1)"
   >
     <Flex alignItems="center">
       <Box color="yellow.400" fontSize="xl" mr={3}>
@@ -336,7 +452,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
           <path d="M12 0L0 20H12L8 32L24 12H12L16 0H12Z" fill="currentColor"/>
         </svg>
       </Box>
-      <Text color="white" fontSize="xs">
+      <Text className="text-slate-500" fontSize="xs">
         Get ready to get insane quality articles made after SERP Analysis, LSI Keywords, Competitor analysis, Deep research and understanding
       </Text>
       <Box 
@@ -357,7 +473,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
 
         <div className="rounded-md w-full">
           <Textarea
-            className="wtext-sm rounded-md w-full flex-grow"
+            className="wtext-sm rounded-md w-full flex-grow text-slate-500"
             placeholder="Keywords (Add 1 Per Line)"
             height="250px"
             value={text}
@@ -370,10 +486,15 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
         <Button
             type="submit"
             colorScheme="brand"
-            onClick={() => sendKeywordsSequentially(lines)}
-            disabled={isProcessing}          >
+            onClick={() =>
+              isGodMode
+                ? sendKeywordsSequentiallyGodmode(lines)
+                : sendKeywordsSequentially(lines)
+            }
+            disabled={isProcessing} >
             {isProcessing ? 'Generating...' : 'Generate'}
-          </Button>
+        </Button>
+
 {isProcessing && !isGodMode &&
     <div style={{ width: "100%", marginTop: '20px' }}>
     {/* <h3>{isProcessing ? `Processing: ${currentKeyword}` : "All keywords processed!"}</h3> */}
@@ -391,7 +512,30 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
     <p className="mt-2 text-slate-500 text-sm">{Math.round(progress)}% Complete</p>
   </div>
 }
-      </VStack>
+       { isProcessingGodmode && isGodMode && 
+         <div className="godmod-progress fixed inset-0 z-50 flex items-center justify-center">
+           <GodmodeLoader progress={progressGodmode} isProcessing={GodModeLoader} />
+           { !GodModeLoader && godmodeArticleRemain === 0 && 
+             <Text className="text-slate-500">Articles generated successfully, redirecting to article list...</Text> 
+           }
+           { !GodModeLoader && godmodeArticleRemain !== 0 && 
+             <VStack spacing={2}>
+              <Text className="text-slate-500">
+               {godmodeArticlePrepared.length} Articles Completed. {godmodeArticleRemain} articles are still in progress, we will email you when completed.
+              </Text>
+              <br/>
+              <Button
+               colorScheme="brand"
+               size="sm"
+               onClick={() => setIsProcessingGodmode(false)}
+              >
+               Generate New Article
+              </Button>
+             </VStack>
+           }
+         </div>      
+       }    
+    </VStack>
 
       {isEditPromptDialogOpen && (
         <EditPromptDialog

@@ -1,19 +1,21 @@
 .chakra-ui-dark .ql-toolbar.ql-snow span, 
 .chakra-ui-dark .ql-toolbar.ql-snow button {
-    color: #fff;
+    color: #64748b;
 }
 .chakra-ui-dark .ql-snow .ql-stroke {
-    stroke: #fff !important;
+    stroke: #64748b !important;
 }
 .ql-editor {
     color: #64748b;
+}
+.ql-container.ql-snow {
+    height: calc(100vh - 152px);
 }
 .chakra-input, .chakra-textarea {
     width: 100%;
     padding: 12px;
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #E2E8F0;
     font-size: 1rem;
 }
 .custom-btn-1 {
@@ -33,3 +35,44 @@
 .custom-btn-1:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
+.editor-right-col {
+    height: calc(100vh - 152px);
+    padding: 15px;
+    border-radius: 5px
+}
+.ql-container.ql-snow {
+    border: none !important;
+    border-radius: 5px
+}
+body.chakra-ui-light .ql-container.ql-snow {
+    background: #fff;
+}
+body.chakra-ui-dark .ql-container.ql-snow {
+    background: #12171f;;
+}
+.ql-toolbar.ql-snow {
+    border: none !important;
+    margin-bottom: 10px;
+}
+.ql-editor p {
+    margin-bottom: 10px !important;
+}
+.ql-editor h1,
+.ql-editor h2, 
+.ql-editor h3, 
+.ql-editor h4,
+.ql-editor h5 {
+    margin-bottom: 13px !important;
+}
+/* Scrollbar Styling for Webkit Browsers */
+.ql-editor::-webkit-scrollbar {
+    width: 10px;
+}
+
+body.chakra-ui-light .godmod-progress {
+    background: #fff;
+}
+body.chakra-ui-dark .godmod-progress {
+    background: #1a202c;
+}
+  

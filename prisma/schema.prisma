@@ -182,6 +182,7 @@ model Articles {
   content       String
   batch         String
   articleType   String?
+  aiScore         Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -197,6 +198,9 @@ model GodmodeArticles {
   metaDescription String?
   batch           String
   articleType     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  aiScore         Int?
+  cronEmail       Int    @default(0)
+  cronRequest     Int    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

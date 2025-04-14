@@ -136,7 +136,7 @@ export async function POST(request: Request) {
 
         aiResponse = await response.text();
         console.log(aiResponse); // I console the value as "Accepted"
-        return NextResponse.json({ status: 200, aiResponse });
+        return NextResponse.json({ status: 200, article });
     }else{
       let content = prompt.replace('{KEYWORD}', text);
       // Send keyword to OpenAI
@@ -192,6 +192,7 @@ export async function PUT(request: Request) {
     }
 
     if(request_data.type === 'article_upadte'){
+      console.log('haggg' + request_data.aiScore);
       if (!request_data.id || typeof request_data.id !== "string") {
         return NextResponse.json({ error: "Invalid article id" }, { status: 400 });
       }
@@ -203,7 +204,8 @@ export async function PUT(request: Request) {
       const updatedTodo = await prismaClient.articles.update({
         where: { id: request_data.id },
         data: {
-          content: request_data.content
+          content: request_data.content,
+          aiScore: request_data.aiScore
         },
       });
   
