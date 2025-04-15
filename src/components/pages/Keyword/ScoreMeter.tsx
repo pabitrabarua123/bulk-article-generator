@@ -17,7 +17,7 @@ type ScoreMeterProps = {
 };
 
 const ScoreMeter: React.FC<ScoreMeterProps> = ({
-  score,
+  score = 28,
   avgScore = 53,
   topScore = 76,
   aiCheckRequest = false,

@@ -40,9 +40,10 @@ export async function POST(request: Request) {
         transactionalId: "cm9cv4eyr03qz110bow6g8cer",
         email: session.user?.email,
         dataVariables: {
+          username: session.user?.name,
           subject: subject,
-          text1: String(contentFilledKeywords.length),
-          text2: String(keywords.length - contentFilled),
+          text1: text1,
+          text2: text2,
         },
       });
     }
@@ -52,24 +53,24 @@ export async function POST(request: Request) {
     let text2 = '';
 
     if(contentFilled === keywords.length){
-      text1 = `Articles generated in ${batch} are now completed`;
+      text1 = `${keywords.length} Articles generated on Godmode are now ready`;
       text2 = '';
-      subject = '';
-      sendMail(subject, text1, text2);
+      subject = `Articles generated in ${batch} are now completed`;
+      await sendMail(subject, text1, text2);
       return NextResponse.json({ status: 200, res: 'Full', contentFilledKeywords });
     }
     if(contentFilled !== keywords.length && contentFilled > 0){
-      text1 = '';
-      text2 = '';
+      text1 = `${String(contentFilled)} Articles generated on Godmode are now ready`;
+      text2 = `${String(keywords.length - contentFilled)} Articles are still in progress, we will email you when they are done.`;
       subject = `Articles generated in ${batch} are partially completed`;
-      sendMail(subject, text1, text2);
+      await sendMail(subject, text1, text2);
       return NextResponse.json({ status: 200, res: 'Partial', contentFilledKeywords, remainingKeywords: keywords.length - contentFilled });
     }
     if(contentFilled === 0){
-      text1 = '';
+      text1 = `${String(keywords.length)} Articles Generated on God mode will be completed in another 20 minutes`;
       text2 = '';
       subject = `Article Generation for ${batch} is taking longer than expected`;
-      sendMail(subject, text1, text2);
+      await sendMail(subject, text1, text2);
       return NextResponse.json({ status: 200, res: 'Partial', contentFilledKeywords, remainingKeywords: keywords.length - contentFilled });
     }
   } catch (error) {
