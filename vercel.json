@@ -1,7 +1,10 @@
 {
-    "functions": {
-      "api/cron/route.ts": {
-        "schedule": "*/2 * * * *"
-      }
+  "functions": {
+    "api/cron/job1/route.ts": {
+      "schedule": "*/5 * * * *"
+    },
+    "api/cron/job2/route.ts": {
+      "schedule": "*/5 * * * *"
     }
-  }  
+  }
+}

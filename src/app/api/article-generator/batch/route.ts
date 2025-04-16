@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const userId = session?.user.id as string;
-    const groupedArticles = await prismaClient.articles.groupBy({
+    const groupedArticles = await prismaClient.godmodeArticles.groupBy({
         by: ['batch'],
         where: {
           userId: session?.user?.id,
@@ -53,7 +53,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Invalid a id" }, { status: 400 });
     }
 
-    await prismaClient.articles.delete({
+    await prismaClient.godmodeArticles.delete({
       where: { id },
     });
 

@@ -199,7 +199,6 @@ model GodmodeArticles {
   batch           String
   articleType     String
   aiScore         Int?
-  cronEmail       Int         @default(0)
   cronRequest     Int         @default(0)
   cronRequestAt   DateTime    @default(now())
   createdAt       DateTime    @default(now())

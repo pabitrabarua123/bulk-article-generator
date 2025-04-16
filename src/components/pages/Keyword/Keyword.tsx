@@ -77,6 +77,7 @@ const Keyword = ({id}: {id: string}) => {
      return num != ''
     }).length;
    }
+
   useEffect(() => {
     if(todos[0]?.content){
       setEditorText(todos[0]?.content);
@@ -168,7 +169,7 @@ const Keyword = ({id}: {id: string}) => {
     }).then(res => res.json())
       .then((json) => {
          console.log(json);  
-         setAiCheck(json.res);
+         setAiCheck(json.aiScore);
          setAiCheckRequest(false);
          // update ai score
         //  if(shouldUpdateDB) {

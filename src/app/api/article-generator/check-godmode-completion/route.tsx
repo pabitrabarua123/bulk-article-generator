@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         transactionalId: "cm9cv4eyr03qz110bow6g8cer",
         email: session.user?.email,
         dataVariables: {
-          username: session.user?.name,
+          username: "haga",
           subject: subject,
           text1: text1,
           text2: text2,
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       text2 = '';
       subject = `Article Generation for ${batch} is taking longer than expected`;
       await sendMail(subject, text1, text2);
-      return NextResponse.json({ status: 200, res: 'Partial', contentFilledKeywords, remainingKeywords: keywords.length - contentFilled });
+      return NextResponse.json({ status: 200, res: 'Partial', contentFilledKeywords, remainingKeywords: keywords.length });
     }
   } catch (error) {
     console.error("Error fetching article:", error);

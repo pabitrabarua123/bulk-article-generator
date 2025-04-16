@@ -223,7 +223,7 @@ const ArticleGenerator: React.FC = () => {
 
   const start25MinLoader = () => {
     setProgressGodmode(0); // reset
-    const duration = 120; // 1500 seconds
+    const duration = 1500; // 1500 seconds
     let secondsPassed = 0;
     let apiCalled = false; // ensure it's called only once
   
@@ -518,7 +518,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
            { !GodModeLoader && godmodeArticleRemain === 0 && 
              <Text className="text-slate-500">Articles generated successfully, redirecting to article list...</Text> 
            }
-           { !GodModeLoader && godmodeArticleRemain !== 0 && 
+           { !GodModeLoader && godmodeArticleRemain !== 0 && godmodeArticleRemain > 0 &&
              <VStack spacing={2}>
               <Text className="text-slate-500">
                {godmodeArticlePrepared.length} Articles Completed. {godmodeArticleRemain} articles are still in progress, we will email you when completed.
@@ -531,6 +531,13 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
               >
                Generate New Article
               </Button>
+             </VStack>
+           }
+           { !GodModeLoader && godmodeArticlePrepared.length === 0  &&
+             <VStack spacing={2}>
+              <Text className="text-slate-500">
+               {godmodeArticleRemain} articles Generated on God mode will be completed in another 20 minutes.
+              </Text>
              </VStack>
            }
          </div>      

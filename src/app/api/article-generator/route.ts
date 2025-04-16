@@ -6,7 +6,7 @@ import { OpenAI } from "openai";
 
 // Function to get all articles for a user
 async function getAllArticles(userId: string) {
-  return await prismaClient.articles.findMany({
+  return await prismaClient.godmodeArticles.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
   });
@@ -14,7 +14,7 @@ async function getAllArticles(userId: string) {
 
 // Function to get articles by batch for a user
 async function getArticlesByBatch(userId: string, batch: string) {
-  return await prismaClient.articles.findMany({
+  return await prismaClient.godmodeArticles.findMany({
     where: { userId, batch },
     orderBy: { createdAt: "desc" },
   });
@@ -22,7 +22,7 @@ async function getArticlesByBatch(userId: string, batch: string) {
 
 // Function to get a single article by ID for a user
 async function getArticleById(userId: string, id: string) {
-  return await prismaClient.articles.findUnique({
+  return await prismaClient.godmodeArticles.findUnique({
     where: { id },
   });
 }
@@ -42,25 +42,6 @@ export async function GET(req: NextRequest) {
     const batch = searchParams.get("batch");
 
     let todos;
-
-    const apiKey = 'eba4efa4329d5a3f04ac97da55e511bd5494f16b';
-    const docId = 'jVZEuLye9YFSWQ1jHVQ5UT';
-    const tableId = 'Table1';
-    const articleId = 498;
-
-    // Fetch data from Grist API
-    const response = await fetch(`https://docs.getgrist.com/api/docs/${docId}/tables/${tableId}/records?filter=id==${articleId}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      }
-    });
-
-    const data = await response.json();
-    const article = data.records && data.records[0];
-
-    console.log(article);
 
     if (id) {
       // Fetch a single article by ID for the logged-in user
@@ -146,12 +127,13 @@ export async function POST(request: Request) {
         temperature: 0.7,
       });
       aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
-      await prismaClient.articles.create({
+      await prismaClient.godmodeArticles.create({
         data: {
           userId,
           content: aiResponse,
           batch: batch,
-          keyword: text
+          keyword: text,
+          articleType: 'lightmode'
         },
       });
   
@@ -201,7 +183,7 @@ export async function PUT(request: Request) {
         return NextResponse.json({ error: "Invalid article text" }, { status: 400 });
       }
   
-      const updatedTodo = await prismaClient.articles.update({
+      const updatedTodo = await prismaClient.godmodeArticles.update({
         where: { id: request_data.id },
         data: {
           content: request_data.content,
@@ -229,7 +211,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Invalid a id" }, { status: 400 });
     }
 
-    await prismaClient.articles.delete({
+    await prismaClient.godmodeArticles.delete({
       where: { id },
     });
 
