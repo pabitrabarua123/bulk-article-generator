@@ -1,14 +1,12 @@
 {
-  "experimental": {
-    "scheduler": [
-      {
-        "path": "/api/cron/job1",
-        "schedule": "*/5 * * * *"
-      },
-      {
-        "path": "/api/cron/job2",
-        "schedule": "*/5 * * * *"
-      }
-    ]
-  }
+  "crons": [
+    {
+      "path": "/api/cron/job1",
+      "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/cron/job2",
+      "schedule": "*/5 * * * *"
+    }
+  ]
 }
