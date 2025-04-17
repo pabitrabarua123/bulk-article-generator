@@ -35,43 +35,38 @@ export async function POST(request: Request) {
       }
     }
 
-    const sendMail = async (subject: string, text1: string, text2: string) => {
+    const sendMail = async (subject: string, text1: string) => {
       await sendTransactionalEmail({
         transactionalId: "cm9cv4eyr03qz110bow6g8cer",
         email: session.user?.email,
         dataVariables: {
-          username: "haga",
-          subject: subject,
           text1: text1,
-          text2: text2,
+          subject: subject,
+          batch: batch
         },
       });
-    }
+    }   
 
     let subject = '';
     let text1 = '';
-    let text2 = '';
 
     if(contentFilled === keywords.length){
       text1 = `${keywords.length} Articles generated on Godmode are now ready`;
-      text2 = '';
       subject = `Articles generated in ${batch} are now completed`;
-      await sendMail(subject, text1, text2);
+      await sendMail(subject, text1);
       return NextResponse.json({ status: 200, res: 'Full', contentFilledKeywords });
     }
     if(contentFilled !== keywords.length && contentFilled > 0){
-      text1 = `${String(contentFilled)} Articles generated on Godmode are now ready`;
-      text2 = `${String(keywords.length - contentFilled)} Articles are still in progress, we will email you when they are done.`;
+      text1 = `${String(contentFilled)} Articles generated on Godmode are now ready. ${String(keywords.length - contentFilled)} Articles are still in progress, we will email you when they are done.`;
       subject = `Articles generated in ${batch} are partially completed`;
-      await sendMail(subject, text1, text2);
+      await sendMail(subject, text1);
       return NextResponse.json({ status: 200, res: 'Partial', contentFilledKeywords, remainingKeywords: keywords.length - contentFilled });
     }
     if(contentFilled === 0){
       text1 = `${String(keywords.length)} Articles Generated on God mode will be completed in another 20 minutes`;
-      text2 = '';
       subject = `Article Generation for ${batch} is taking longer than expected`;
-      await sendMail(subject, text1, text2);
-      return NextResponse.json({ status: 200, res: 'Partial', contentFilledKeywords, remainingKeywords: keywords.length });
+      await sendMail(subject, text1);
+      return NextResponse.json({ status: 200, res: 'Incomplete', remainingKeywords: keywords.length });
     }
   } catch (error) {
     console.error("Error fetching article:", error);

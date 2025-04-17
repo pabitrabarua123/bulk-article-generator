@@ -170,6 +170,7 @@ const ArticleGenerator: React.FC = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [godmodeArticlePrepared, setGodmodeArticlePrepared] = useState([]);
   const [godmodeArticleRemain, setGodmodeArticleRemain] = useState(0);
+  const [godmodeStatus, setGodmodeStatus] = useState('');
   const [isProcessingGodmode, setIsProcessingGodmode] = useState(false);
   const [progressGodmode, setProgressGodmode] = useState(0);
   const [GodModeLoader, setGodModeLoader] = useState(false);
@@ -263,6 +264,15 @@ const ArticleGenerator: React.FC = () => {
          if(data.res === 'Partial'){
            setGodmodeArticlePrepared(data.contentFilledKeywords);
            setGodmodeArticleRemain(data.remainingKeywords);
+           setGodmodeStatus('Partial');
+         }
+         if(data.res === 'Full'){
+           setGodmodeArticlePrepared(data.contentFilledKeywords);
+           setGodmodeStatus('Full');
+         }
+         if(data.res === 'Incomplete'){
+          setGodmodeArticleRemain(data.remainingKeywords);
+          setGodmodeStatus('Incomplete');
          }
       })
       .catch(error => console.error('Error:', error));
@@ -515,10 +525,10 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
        { isProcessingGodmode && isGodMode && 
          <div className="godmod-progress fixed inset-0 z-50 flex items-center justify-center">
            <GodmodeLoader progress={progressGodmode} isProcessing={GodModeLoader} />
-           { !GodModeLoader && godmodeArticleRemain === 0 && 
+           { !GodModeLoader && godmodeStatus === 'Full' &&
              <Text className="text-slate-500">Articles generated successfully, redirecting to article list...</Text> 
            }
-           { !GodModeLoader && godmodeArticleRemain !== 0 && godmodeArticleRemain > 0 &&
+           { !GodModeLoader && godmodeStatus === 'Partial' &&
              <VStack spacing={2}>
               <Text className="text-slate-500">
                {godmodeArticlePrepared.length} Articles Completed. {godmodeArticleRemain} articles are still in progress, we will email you when completed.
@@ -533,11 +543,19 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
               </Button>
              </VStack>
            }
-           { !GodModeLoader && godmodeArticlePrepared.length === 0  &&
+           { !GodModeLoader && godmodeStatus === 'Incomplete' &&
              <VStack spacing={2}>
               <Text className="text-slate-500">
                {godmodeArticleRemain} articles Generated on God mode will be completed in another 20 minutes.
               </Text>
+              <br/>
+              <Button
+               colorScheme="brand"
+               size="sm"
+               onClick={() => setIsProcessingGodmode(false)}
+              >
+               Generate New Article
+              </Button>
              </VStack>
            }
          </div>      
