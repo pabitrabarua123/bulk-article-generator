@@ -1,4 +1,5 @@
 import { prismaClient } from "@/prisma/db";
+import { NextResponse } from 'next/server';
 
 export async function GET() {
 
@@ -45,5 +46,5 @@ export async function GET() {
       }
     }
 
-    return new Response("Cron executed successfully!", { status: 200 });
+    return NextResponse.json({ ok: true });
   }

@@ -175,18 +175,6 @@ model Todo {
   updatedAt   DateTime @updatedAt
 }
 
-model Articles {
-  id            String   @id @default(cuid())
-  userId        String
-  keyword       String
-  content       String
-  batch         String
-  articleType   String?
-  aiScore         Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model GodmodeArticles {
   id              String   @id @default(cuid())
   userId          String
