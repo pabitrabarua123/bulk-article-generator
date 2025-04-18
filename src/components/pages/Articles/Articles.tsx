@@ -20,7 +20,7 @@ import {
 } from "react-icons/tb";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Articles } from "@prisma/client";
+import { GodmodeArticles } from "@prisma/client";
 import {
   Column,
   ColumnDef,
@@ -101,7 +101,7 @@ const ArticlesList: React.FC = () => {
         throw new Error("Network response was not ok");
       }
       return response.json() as Promise<{
-        todos: (Omit<Articles, "updatedAt"> & { updatedAt: string })[];
+        todos: (Omit<GodmodeArticles, "updatedAt"> & { updatedAt: string })[];
       }>;
     },
     enabled: true,
@@ -135,7 +135,7 @@ const ArticlesList: React.FC = () => {
   });
 
   const handleUpdateTodo = async (
-    todo: Pick<Articles, "id" | "content">
+    todo: Pick<GodmodeArticles, "id" | "content">
   ) => {
     return await updateTodoMutation.mutateAsync(todo);
   };
@@ -177,7 +177,7 @@ const ArticlesList: React.FC = () => {
           </Button>
         );
       },
-      cell: ({ row }: { row: Row<Articles> }) => (
+      cell: ({ row }: { row: Row<GodmodeArticles> }) => (
         <div className="lowercase">
           {new Date(row.getValue("updatedAt")).toLocaleString()}
         </div>
@@ -186,7 +186,7 @@ const ArticlesList: React.FC = () => {
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }: { row: Row<Articles> }) => {
+      cell: ({ row }: { row: Row<GodmodeArticles> }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -227,7 +227,7 @@ const ArticlesList: React.FC = () => {
   const table = useReactTable({
     data: todos,
     columns: columns as ColumnDef<
-      Omit<Articles, "updatedAt"> & { updatedAt: string }
+      Omit<GodmodeArticles, "updatedAt"> & { updatedAt: string }
     >[],
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -247,9 +247,9 @@ const ArticlesList: React.FC = () => {
   });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const [todoToDelete, setTodoToDelete] = React.useState<Articles | null>(null);
+  const [todoToDelete, setTodoToDelete] = React.useState<GodmodeArticles | null>(null);
 
-  const openDeleteDialog = (todo: Articles) => {
+  const openDeleteDialog = (todo: GodmodeArticles) => {
     setTodoToDelete(todo);
     setIsDeleteDialogOpen(true);
   };
@@ -260,7 +260,7 @@ const ArticlesList: React.FC = () => {
   };
 
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-  const [todoToEdit, setTodoToEdit] = React.useState<Articles | null>(null);
+  const [todoToEdit, setTodoToEdit] = React.useState<GodmodeArticles | null>(null);
 
   const closeEditDialog = () => {
     setTodoToEdit(null);
@@ -362,7 +362,7 @@ const DeleteTodoDialog = ({
   isOpen,
   onClose,
 }: {
-  todo: Articles | undefined;
+  todo: GodmodeArticles | undefined;
   isOpen: boolean;
   onClose: () => void;
 }) => {
@@ -423,8 +423,8 @@ const EditTodoDialog = ({
   isLoading: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (todo: Pick<Articles, "id" | "batch" | "content" >) => Promise<void>;
-  todo: Articles | undefined;
+  onUpdate: (todo: Pick<GodmodeArticles, "id" | "batch" | "content" >) => Promise<void>;
+  todo: GodmodeArticles | undefined;
 }) => {
   const [text, setText] = useState(todo?.batch || "");
 
