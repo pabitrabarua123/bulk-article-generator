@@ -86,7 +86,7 @@ const ScoreMeter: React.FC<ScoreMeterProps> = ({
             {score ? score : 'NA'}
             <Text as="span" fontSize="md" color="gray.500">/100</Text>
           </Text>
-          <Text fontSize="xs" color="gray.500">Suggested: &lt;20</Text>
+          <Text fontSize="xs" color="gray.500">Suggested: &gt; 80</Text>
         </Box>
       </Box>
 

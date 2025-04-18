@@ -30,6 +30,8 @@ import Link from 'next/link';
 import { Logo1 } from "../../atoms/Logo1/Logo1";
 import ScoreMeter from './ScoreMeter';
 import { MdCheckCircle, MdOutlineTextSnippet, MdAutoGraph } from 'react-icons/md';
+import { syllable } from 'syllable';
+import { htmlToText } from 'html-to-text';
 
 const Keyword = ({id}: {id: string}) => {
 
@@ -76,14 +78,41 @@ const Keyword = ({id}: {id: string}) => {
     return str.split(' ').filter(function(num) {
      return num != ''
     }).length;
-   }
+  }
+  
+  const [ReadabilityScore, setReadabilityScore] = useState<number | null>(null);
+
+  function checkReadabilityScore(content: string): number | null {
+    if (!content || typeof content !== 'string') return null;
+  
+    const text = htmlToText(content, { wordwrap: false });
+  
+    const sentences = text.split(/[.!?]+/).filter(Boolean);
+    const words = text.split(/\s+/).filter(Boolean);
+    const syllables = words.reduce((acc: number, word: string) => acc + syllable(word), 0);
+  
+    const totalSentences = sentences.length;
+    const totalWords = words.length;
+  
+    // Avoid division by zero
+    if (totalSentences === 0 || totalWords === 0) return null;
+  
+    const fleschScore =
+      206.835 -
+      1.015 * (totalWords / totalSentences) -
+      84.6 * (syllables / totalWords);
+  
+    return Number(fleschScore.toFixed(2));
+  }
 
   useEffect(() => {
     if(todos[0]?.content){
       setEditorText(todos[0]?.content);
       let count = getCount(todos[0]?.content);
       setWordCount(count);
-      
+      //console.log('readibility score: ' + checkReadabilityScore(todos[0]?.content));
+      setReadabilityScore(checkReadabilityScore(todos[0]?.content));
+
       if(todos[0]?.aiScore){
         setAiCheck(todos[0]?.aiScore);
       }else{
@@ -293,7 +322,7 @@ const Keyword = ({id}: {id: string}) => {
             <Icon as={MdAutoGraph} color="purple.500" boxSize={6} />
             <Text fontWeight="medium" className="text-slate-500">Readability Score</Text>
           </Flex>
-          <Text fontWeight="medium" className="text-slate-500">78/100</Text>
+          <Text fontWeight="medium" className="text-slate-500">{ ReadabilityScore ? ReadabilityScore : ''}/100</Text>
         </Flex>
       </Flex>
     </Box>

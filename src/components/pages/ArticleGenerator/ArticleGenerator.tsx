@@ -139,12 +139,16 @@ const ArticleGenerator: React.FC = () => {
 
     setIsProcessing(true);
 
+    const batchValue = batchRef.current && batchRef.current.trim() !== ''
+    ? batchRef.current
+    : "Batch_" + (Math.floor(Math.random() * 9000) + 1000);
+
     const response = await fetch('/api/article-generator/batch', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
       },
-      body: JSON.stringify({batch: batchRef.current}),
+      body: JSON.stringify({batch: batchValue }),
     });
 
     const data = await response.json();
@@ -158,7 +162,7 @@ const ArticleGenerator: React.FC = () => {
       setCurrentKeyword(keywords[i]);
       try {
         await generateArticle.mutateAsync({
-          batch: batchRef.current !== "" ? batchRef.current : "Batch_" + Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
+          batch: batchRef.current,
           text: keywords[i],
           prompt: prompt,
           is_godmode: isGodMode,
@@ -210,12 +214,16 @@ const ArticleGenerator: React.FC = () => {
     setGodModeLoader(true);
     start25MinLoader(); // 🔥 Start the 25-min loader here
 
+    const batchValue = batchRef.current && batchRef.current.trim() !== ''
+    ? batchRef.current
+    : "Batch_" + (Math.floor(Math.random() * 9000) + 1000);
+
     const response = await fetch('/api/article-generator/batch', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
       },
-      body: JSON.stringify({batch: batchRef.current}),
+      body: JSON.stringify({batch: batchValue }),
     });
 
     const data = await response.json();
@@ -225,10 +233,7 @@ const ArticleGenerator: React.FC = () => {
       setCurrentKeyword(keywords[i]);
       try {
         let res = await generateArticle.mutateAsync({
-          batch:
-            batchRef.current !== ""
-              ? batchRef.current
-              : "Batch_" + Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
+          batch: batchRef.current,
           text: keywords[i],
           prompt: prompt,
           is_godmode: isGodMode,
