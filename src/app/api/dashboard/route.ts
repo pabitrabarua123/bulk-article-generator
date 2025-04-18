@@ -42,20 +42,20 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const godmodeCount = await prismaClient.articles.count({
+    const godmodeCount = await prismaClient.godmodeArticles.count({
       where: { userId: session?.user?.id, articleType: 'godmode' }
     });
     
-    const litemodeCount = await prismaClient.articles.count({
+    const litemodeCount = await prismaClient.godmodeArticles.count({
       where: { userId: session?.user?.id, articleType: 'litemode' }
     });
 
-    const uniqueBatches = await prismaClient.articles.groupBy({
+    const uniqueBatches = await prismaClient.godmodeArticles.groupBy({
       by: ['batch'],
       where: { userId: session?.user?.id }
     });
 
-    const articles = await prismaClient.articles.count({
+    const articles = await prismaClient.godmodeArticles.count({
       where: { userId: session?.user?.id }
     });
 
