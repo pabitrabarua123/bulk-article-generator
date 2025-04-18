@@ -20,7 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { DashboardData } from "@/app/api/dashboard/route";
 import { TrendChart } from "./components/trend-chart";
-import { Articles } from "@prisma/client";
+import { GodmodeArticles } from "@prisma/client";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -62,7 +62,7 @@ export const Dashboard = () => {
         throw new Error("Network response was not ok");
       }
       return response.json() as Promise<{
-        todos: (Omit<Articles, "updatedAt"> & { updatedAt: string })[];
+        todos: (Omit<GodmodeArticles, "updatedAt"> & { updatedAt: string })[];
       }>;
     }
   });
@@ -249,15 +249,15 @@ export const Dashboard = () => {
                 <CardContent>
                   <Skeleton isLoaded={!isLoading} borderRadius="8px">
                   <div className="space-y-8">
-                  {articleData && articleData.todos.slice(0, 7).map((article: { id: string, keyword: string; content: string }, index: number) => (
-  <div className="flex items-center" key={index}>
-    <div className="ml-4 space-y-1">
-      <p className="text-sm font-medium leading-none">
-       <a href={`/articles/${article.id}`}>{article.keyword}</a>
-      </p>
-    </div>
-  </div>
-))}
+                  {articleData && articleData.todos.slice(0, 7).map((article: { id: string; keyword: string; content: string | null }, index: number) => (
+                   <div className="flex items-center" key={index}>
+                    <div className="ml-4 space-y-1">
+                     <p className="text-sm font-medium leading-none">
+                      <a href={`/articles/${article.id}`}>{article.keyword}</a>
+                     </p>
+                    </div>
+                   </div>
+                  ))}
                   </div>
                   </Skeleton>
                 </CardContent>
