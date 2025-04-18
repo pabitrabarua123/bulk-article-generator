@@ -22,7 +22,7 @@ import {
 } from "react-icons/tb";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Articles } from "@prisma/client";
+import { GodmodeArticles } from "@prisma/client";
 import { queryClient } from "@/app/providers";
 import { useRouter } from "next/navigation";
 import { HStack, Stack, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
@@ -63,7 +63,7 @@ const Keyword = ({id}: {id: string}) => {
         throw new Error("Network response was not ok");
       }
       return response.json() as Promise<{
-        todos: (Omit<Articles, "updatedAt"> & { updatedAt: string })[];
+        todos: (Omit<GodmodeArticles, "updatedAt"> & { updatedAt: string })[];
       }>;
     }
   });
@@ -83,12 +83,12 @@ const Keyword = ({id}: {id: string}) => {
       setEditorText(todos[0]?.content);
       let count = getCount(todos[0]?.content);
       setWordCount(count);
-    }
-
-    if(todos[0]?.aiScore){
-      setAiCheck(todos[0]?.aiScore);
-    }else{
-      checkAI(todos[0]?.content, true);
+      
+      if(todos[0]?.aiScore){
+        setAiCheck(todos[0]?.aiScore);
+      }else{
+        checkAI(todos[0]?.content, true);
+      }
     }
   }, [todos]);
 
