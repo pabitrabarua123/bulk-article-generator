@@ -31,7 +31,6 @@ import { Logo1 } from "../../atoms/Logo1/Logo1";
 import ScoreMeter from './ScoreMeter';
 import { MdCheckCircle, MdOutlineTextSnippet, MdAutoGraph } from 'react-icons/md';
 import { syllable } from 'syllable';
-import { htmlToText } from 'html-to-text';
 
 const Keyword = ({id}: {id: string}) => {
 
@@ -84,7 +83,7 @@ const Keyword = ({id}: {id: string}) => {
 
   function checkReadabilityScore(content: string): number | null {
     if (!content || typeof content !== 'string') return null;
-  
+    const { htmlToText } = require('html-to-text');
     const text = htmlToText(content, { wordwrap: false });
   
     const sentences = text.split(/[.!?]+/).filter(Boolean);
