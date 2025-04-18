@@ -45,6 +45,47 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// creating unique batch
+export async function POST(request: Request) {
+  
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { batch } = await request.json();
+  if (!batch) {
+    return NextResponse.json({ error: "Batch is not there" }, { status: 401 });
+  }
+
+  try{
+    let finalBatchName = batch.trim();
+    let suffix = 1;
+
+    // Check if the batch name exists
+    let exists = await prismaClient.godmodeArticles.findFirst({
+        where: { batch: finalBatchName }
+    });
+
+    // If exists, keep incrementing a suffix until it's unique
+    while (exists) {
+        finalBatchName = `${batch}${suffix}`;
+        suffix++;
+
+        exists = await prismaClient.godmodeArticles.findFirst({
+            where: { batch: finalBatchName }
+        });
+    }
+
+    return NextResponse.json({ status: 200, assignedBatch: finalBatchName });
+  } catch (error) {
+    console.error("Error creating batch:", error);
+    return NextResponse.json(
+      { error: "Failed to create batch" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { id } = await request.json();

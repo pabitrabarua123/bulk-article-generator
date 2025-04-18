@@ -131,13 +131,25 @@ const ArticleGenerator: React.FC = () => {
     if(keywords.length === 0){
        toast.error("Please enter Keywords");
       return;
-   }
-   if(keywords.length > 10) {
-    toast.error("Maximum allowed Keywords(10) exceeds!");
-    return;
-   }
+    }
+    if(keywords.length > 10) {
+     toast.error("Maximum allowed Keywords(10) exceeds!");
+     return;
+    }
 
     setIsProcessing(true);
+
+    const response = await fetch('/api/article-generator/batch', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({batch: batchRef.current}),
+    });
+
+    const data = await response.json();
+    batchRef.current = data.assignedBatch;
+
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + 0.3, 95)); // Slow continuous progress
     }, 1000);
@@ -197,6 +209,17 @@ const ArticleGenerator: React.FC = () => {
     setIsProcessingGodmode(true);
     setGodModeLoader(true);
     start25MinLoader(); // 🔥 Start the 25-min loader here
+
+    const response = await fetch('/api/article-generator/batch', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({batch: batchRef.current}),
+    });
+
+    const data = await response.json();
+    batchRef.current = data.assignedBatch;
   
     for (let i = 0; i < keywords.length; i++) {
       setCurrentKeyword(keywords[i]);
