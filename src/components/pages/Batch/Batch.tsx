@@ -20,7 +20,7 @@ import {
 } from "react-icons/tb";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Articles } from "@prisma/client";
+import { GodmodeArticles } from "@prisma/client";
 import {
   Column,
   ColumnDef,
@@ -123,7 +123,7 @@ const Batch: React.FC = () => {
   });
 
   const handleUpdateTodo = async (
-    todo: Pick<Articles, "id" | "content">
+    todo: Pick<GodmodeArticles, "id" | "content">
   ) => {
     return await updateTodoMutation.mutateAsync(todo);
   };
@@ -220,7 +220,7 @@ const Batch: React.FC = () => {
   const table = useReactTable({
     data: todos,
     columns: columns as ColumnDef<
-      Omit<Articles, "updatedAt"> & { updatedAt: string }
+      Omit<GodmodeArticles, "updatedAt"> & { updatedAt: string }
     >[],
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -240,9 +240,9 @@ const Batch: React.FC = () => {
   });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const [todoToDelete, setTodoToDelete] = React.useState<Articles | null>(null);
+  const [todoToDelete, setTodoToDelete] = React.useState<GodmodeArticles | null>(null);
 
-  const openDeleteDialog = (todo: Articles) => {
+  const openDeleteDialog = (todo: GodmodeArticles) => {
     setTodoToDelete(todo);
     setIsDeleteDialogOpen(true);
   };
@@ -253,7 +253,7 @@ const Batch: React.FC = () => {
   };
 
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-  const [todoToEdit, setTodoToEdit] = React.useState<Articles | null>(null);
+  const [todoToEdit, setTodoToEdit] = React.useState<GodmodeArticles | null>(null);
 
   const closeEditDialog = () => {
     setTodoToEdit(null);
@@ -351,7 +351,7 @@ const DeleteTodoDialog = ({
   isOpen,
   onClose,
 }: {
-  todo: Articles | undefined;
+  todo: GodmodeArticles | undefined;
   isOpen: boolean;
   onClose: () => void;
 }) => {
@@ -412,8 +412,8 @@ const EditTodoDialog = ({
   isLoading: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (todo: Pick<Articles, "id" | "batch" | "content" >) => Promise<void>;
-  todo: Articles | undefined;
+  onUpdate: (todo: Pick<GodmodeArticles, "id" | "batch" | "content" >) => Promise<void>;
+  todo: GodmodeArticles | undefined;
 }) => {
   const [text, setText] = useState(todo?.batch || "");
 
