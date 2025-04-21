@@ -29,8 +29,14 @@ export async function POST(request: Request) {
       if(article){
           batch = article.batch;
           if(article.content){
-              contentFilled++;
-              contentFilledKeywords.push(article.keyword);
+             await prismaClient.godmodeArticles.update({
+               where: { id: article.id },
+               data: {
+                 status: 1,
+               },
+             });
+             contentFilled++;
+             contentFilledKeywords.push(article.keyword);
           }
       }
     }

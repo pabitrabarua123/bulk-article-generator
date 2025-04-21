@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         params.append('expand_article', 'No');
         params.append('links', '.');
         params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
-       // params.append('secret_key', 'kdfmnids9fds0fi4I');
+        //params.append('secret_key', 'kdfmnids9fds0fi4I');
 
         const response = await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
            method: 'POST',
@@ -133,7 +133,8 @@ export async function POST(request: Request) {
           content: aiResponse,
           batch: batch,
           keyword: text,
-          articleType: 'lightmode'
+          articleType: 'lightmode',
+          status: 1,
         },
       });
   

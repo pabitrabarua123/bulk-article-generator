@@ -3,6 +3,7 @@ import { prismaClient } from "@/prisma/db";
 import { HttpStatusCode } from "axios";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { startOfMonth, endOfMonth } from 'date-fns';
 
 export type DashboardData = {
   revenue: {
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
     });
     
     const litemodeCount = await prismaClient.godmodeArticles.count({
-      where: { userId: session?.user?.id, articleType: 'litemode' }
+      where: { userId: session?.user?.id, articleType: 'lightmode' }
     });
 
     const uniqueBatches = await prismaClient.godmodeArticles.groupBy({
@@ -58,6 +59,8 @@ export async function GET(req: NextRequest) {
     const articles = await prismaClient.godmodeArticles.count({
       where: { userId: session?.user?.id }
     });
+
+    const currentYear = new Date().getFullYear();
 
     const data: DashboardData = {
       revenue: {
@@ -79,51 +82,135 @@ export async function GET(req: NextRequest) {
       charts: [
         {
           name: "Jan",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 0)),
+              lte: endOfMonth(new Date(currentYear, 0)),
+             },
+            },
+          }),
         },
         {
           name: "Feb",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 1)),
+              lte: endOfMonth(new Date(currentYear, 1)),
+             },
+            },
+          }),
         },
         {
           name: "Mar",
-          total: articles,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 2)),
+              lte: endOfMonth(new Date(currentYear, 2)),
+             },
+            },
+          }),
         },
         {
           name: "Apr",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 3)),
+              lte: endOfMonth(new Date(currentYear, 3)),
+             },
+            },
+          }),
         },
         {
           name: "May",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 4)),
+              lte: endOfMonth(new Date(currentYear, 4)),
+             },
+            },
+          }),
         },
         {
           name: "Jun",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 5)),
+              lte: endOfMonth(new Date(currentYear, 5)),
+             },
+            },
+          }),
         },
         {
           name: "Jul",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 6)),
+              lte: endOfMonth(new Date(currentYear, 6)),
+             },
+            },
+          }),
         },
         {
           name: "Aug",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 7)),
+              lte: endOfMonth(new Date(currentYear, 7)),
+             },
+            },
+          }),
         },
         {
           name: "Sep",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 8)),
+              lte: endOfMonth(new Date(currentYear, 8)),
+             },
+            },
+          }),
         },
         {
           name: "Oct",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 9)),
+              lte: endOfMonth(new Date(currentYear, 9)),
+             },
+            },
+          }),
         },
         {
           name: "Nov",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 10)),
+              lte: endOfMonth(new Date(currentYear, 10)),
+             },
+            },
+          }),
         },
         {
           name: "Dec",
-          total: 0,
+          total: await prismaClient.godmodeArticles.count({
+            where: {
+             createdAt: {
+              gte: startOfMonth(new Date(currentYear, 11)),
+              lte: endOfMonth(new Date(currentYear, 11)),
+             },
+            },
+          }),
         },
       ],
       trend: [
