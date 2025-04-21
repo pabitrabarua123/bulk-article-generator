@@ -145,6 +145,7 @@ const ArticlesList: React.FC = () => {
   const columnHelper = createColumnHelper<{
     id: string;
     keyword: string;
+    status: number;
     updatedAt: string;
   }>();
 
@@ -182,6 +183,16 @@ const ArticlesList: React.FC = () => {
           {new Date(row.getValue("updatedAt")).toLocaleString()}
         </div>
       ),
+    },
+    {
+      id: "status",
+      enableHiding: false,
+      header: 'Status',
+      cell: ({ row }: { row: Row<GodmodeArticles> }) => {
+        return (
+          <Text>{row.original.status === 1 ? 'Complete' : 'On progress'}</Text>
+        );
+      },
     },
     {
       id: "actions",

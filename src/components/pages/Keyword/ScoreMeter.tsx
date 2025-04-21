@@ -14,14 +14,16 @@ type ScoreMeterProps = {
   topScore?: number;
   aiCheckRequest: boolean;
   checkAI: () => void;
+  colorMode: string;
 };
 
 const ScoreMeter: React.FC<ScoreMeterProps> = ({
   score,
-  avgScore = 53,
-  topScore = 76,
+  avgScore,
+  topScore,
   aiCheckRequest = false,
-  checkAI
+  checkAI,
+  colorMode
 }) => {
   const radius = 75;
   const stroke = 6; // ✅ Thin stroke width
@@ -32,7 +34,7 @@ const ScoreMeter: React.FC<ScoreMeterProps> = ({
   const strokeDashoffset = circumference * (1 - percent);
 
   return (
-    <Box p={4} rounded="xl" boxShadow="md" w="100%">
+    <Box p={4} rounded="xl" boxShadow="md" w="100%" bg={colorMode === 'dark' ? '#151922' : '#fff'}>
       {/* Header */}
       <Flex justify="center" align="center" mb={3}>
        <Text fontWeight="bold" fontSize="lg" className="text-slate-500 text-center">

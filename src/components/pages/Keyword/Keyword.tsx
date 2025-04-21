@@ -35,14 +35,6 @@ import { syllable } from 'syllable';
 const Keyword = ({id}: {id: string}) => {
 
   const { colorMode, toggleColorMode } = useColorMode();
-  //console.log(colorMode);
-  useEffect(() => {
-    if(colorMode === 'dark'){
-      document.body.style.backgroundColor = '#1a202c';
-    }else{
-      document.body.style.backgroundColor = '#f5faff';
-    }
-  }, [colorMode])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -279,15 +271,14 @@ const Keyword = ({id}: {id: string}) => {
                   <TbArrowLeft size={20} />Generate New Article
                  </Link>
                 </div>
-                <div className="editor-right-col" style={{ backgroundColor: colorMode === 'light' ? '#fff' : '#12171f' }}>
-                 <Box>
+                <div className="editor-right-col">
                   <ScoreMeter 
                     score={ai_check} 
-                    avgScore={30} 
-                    topScore={5} 
+                    avgScore={65} 
+                    topScore={95} 
                     aiCheckRequest={ai_check_request}
-                    checkAI={() => checkAI(editorText, false)}/>
-                 </Box> 
+                    checkAI={() => checkAI(editorText, false)}
+                    colorMode={colorMode}/>
     <Box
       boxShadow="md"
       border="none"
@@ -295,6 +286,7 @@ const Keyword = ({id}: {id: string}) => {
       p={6}
       shadow="md"
       className="w-full max-w-lg mx-auto mt-[30px]"
+      bg={colorMode === 'dark' ? '#151922' : '#fff'}
     >
       <Flex direction="column" gap={4}>
         {/* Plagiarism Score */}
