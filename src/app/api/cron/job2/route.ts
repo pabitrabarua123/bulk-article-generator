@@ -1,5 +1,6 @@
 import { prismaClient } from "@/prisma/db";
 import { NextResponse } from 'next/server';
+import { sendTransactionalEmail } from "@/libs/loops";
 
 export async function GET() {
 
@@ -34,7 +35,25 @@ export async function GET() {
 
             if(missingContentCount === 0){
                 // send email to user to notify all articles populated
-                // update field cronRequest to 2
+                let user = await prismaClient.user.findUnique({
+                    where: {
+                      id: articles[i].userId
+                    }
+                  });
+                  
+                  if (user?.email) {
+                    await sendTransactionalEmail({
+                      transactionalId: "cm9cv4eyr03qz110bow6g8cer",
+                      email: user.email,
+                      dataVariables: {
+                        text1: `${withContentCount} Articles generated on Godmode are now ready`,
+                        subject: `Articles generated in ${batch} are now completed`,
+                        batch: batch
+                      },
+                    });
+                  } else {
+                    console.warn(`No email found for user ID: ${articles[i].userId}`);
+                  }
                 
             }
         }  

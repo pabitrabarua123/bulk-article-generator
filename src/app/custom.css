@@ -18,6 +18,16 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 1rem;
 }
+body.chakra-ui-light .chakra-input, 
+body.chakra-ui-light .chakra-textarea {
+    border: 1px solid #e2e8f0;
+}
+.godmode-notification {
+    border: 1px dashed rgba(255, 255, 255, 0.1)
+}
+body.chakra-ui-light .godmode-notification {
+    border: 1px dashed #c6c6c6;
+}
 .custom-btn-1 {
     background-color: transparent;
     color: #E2E8F0;
@@ -35,6 +45,15 @@
 .custom-btn-1:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
+body.chakra-ui-light .custom-btn-1 {
+    color: #ffffff;
+    border: 1px solid #2196F3;
+    background: #2196F3;
+}
+body.chakra-ui-light .custom-btn-1:hover {
+    background-color: #158ae7;
+}
+
 .editor-right-col {
     height: calc(100vh - 152px);
     padding: 0;

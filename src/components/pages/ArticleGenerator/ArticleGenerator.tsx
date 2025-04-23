@@ -482,7 +482,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
     borderRadius="md"
     p={2}
     mb={1}
-    border="1px dashed rgba(255, 255, 255, 0.1)"
+    className="godmode-notification"
   >
     <Flex alignItems="center">
       <Box color="yellow.400" fontSize="xl" mr={3}>
