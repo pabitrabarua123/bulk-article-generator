@@ -73,7 +73,6 @@ const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
             {progress.toFixed(1)}%
           </CircularProgressLabel>
         </CircularProgress>
-
         { progress < 100 && (
           <Text fontSize="md" className="text-slate-500">
            {label}...
