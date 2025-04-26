@@ -511,7 +511,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
 
         <div className="rounded-md w-full">
           <Textarea
-            className="wtext-sm rounded-md w-full flex-grow text-slate-500"
+            className="wtext-sm rounded-md w-full flex-grow text-slate-500 ca"
             placeholder="Keywords (Add 1 Per Line)"
             height="250px"
             value={text}
