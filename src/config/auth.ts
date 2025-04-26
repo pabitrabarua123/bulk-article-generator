@@ -19,7 +19,7 @@ export const authOptions: AuthOptions = {
     EmailProvider({
       async sendVerificationRequest({ identifier: email, url }) {
         await sendTransactionalEmail({
-          transactionalId: "cm6eqpyrq00ynk3awmmfy8m7g", // the transactional id you created on Loops
+          transactionalId: "cm9yenveh6prfqid0oangs25e", // the transactional id you created on Loops
           email,
           dataVariables: {
             url, // change it to the variable you set in the Loops transactional

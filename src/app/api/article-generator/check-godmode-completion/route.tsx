@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     const sendMail = async (subject: string, text1: string) => {
       await sendTransactionalEmail({
-        transactionalId: "cm9cv4eyr03qz110bow6g8cer",
+        transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
         email: session.user?.email,
         dataVariables: {
           text1: text1,
