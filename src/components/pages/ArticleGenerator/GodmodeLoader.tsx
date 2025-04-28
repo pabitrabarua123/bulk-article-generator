@@ -43,11 +43,11 @@ interface GodmodeLoaderProps {
 }
 
 const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
-  if (!isProcessing) return null;
-
   const spinnerColor = useColorModeValue("blackAlpha.300", "whiteAlpha.300");
   const bgColor = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.600", "gray.300");
+
+  if (!isProcessing) return null;
 
   const elapsed = (progress / 100) * TOTAL_DURATION;
   const remaining = TOTAL_DURATION - elapsed;
@@ -125,7 +125,7 @@ const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
               </Flex>
 
               <Text fontSize="sm" color={textColor} textAlign="center">
-                We will notify you via email once it's completed.
+                We will notify you via email once it&apos;s completed.
                 You may go to the dashboard and continue with your work.
               </Text>
 
