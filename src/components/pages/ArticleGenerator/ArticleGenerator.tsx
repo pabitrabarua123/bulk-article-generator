@@ -229,25 +229,23 @@ const ArticleGenerator: React.FC = () => {
     const data = await response.json();
     batchRef.current = data.assignedBatch;
   
-    for (let i = 0; i < keywords.length; i++) {
-      setCurrentKeyword(keywords[i]);
-      try {
-        let res = await generateArticle.mutateAsync({
-          batch: batchRef.current,
-          text: keywords[i],
-          prompt: prompt,
-          is_godmode: isGodMode,
-        });
-        // console.log(res.article);
-         godModeArticleIds.current[i] = res.article.id;
-      } catch (error) {
-        console.error(`Error processing keyword "${keywords[i]}":`, error);
-        toast.error(`Error creating article for the keyword: "${keywords[i]}"`);
-      }
+    try {
+      const res = await generateArticle.mutateAsync({
+        batch: batchRef.current,
+        text: keywords.join('\n'),
+        prompt: prompt,
+        is_godmode: isGodMode,
+      });
+      
+      // Store all article IDs
+      godModeArticleIds.current = res.articles.map((article: any) => article.id);
+      
+      console.log(godModeArticleIds.current);
+      updateBalance(keywords.length);
+    } catch (error) {
+      console.error("Error processing keywords:", error);
+      toast.error("Error creating articles");
     }
-    console.log(godModeArticleIds.current);
-    //setIsProcessing(false); // loop done, but loader continues independently
-    updateBalance(keywords.length);
   };
 
   const start25MinLoader = () => {

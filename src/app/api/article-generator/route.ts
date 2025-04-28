@@ -87,58 +87,61 @@ export async function POST(request: Request) {
     }
     let aiResponse = '';
     if(is_godmode){
-        let article = await prismaClient.godmodeArticles.create({
-          data: {
-            userId,
-            batch: batch,
-            keyword: text,
-            articleType: 'godmode'
-          },
+        // Split the text into individual keywords
+        const keywords = text.split('\n').filter(keyword => keyword.trim() !== '');
+        const articles = [];
+
+        for (const keyword of keywords) {
+            let article = await prismaClient.godmodeArticles.create({
+                data: {
+                    userId,
+                    batch: batch,
+                    keyword: keyword,
+                    articleType: 'godmode'
+                },
+            });
+            articles.push(article);
+
+            const params = new URLSearchParams();
+            params.append('keyword', keyword);
+            params.append('id', article.id);
+            params.append('comment', '.');
+            params.append('featured_image_required', 'No');
+            params.append('additional_image_required', 'No');
+            params.append('expand_article', 'No');
+            params.append('links', '.');
+            params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+            //params.append('secret_key', 'kdfmnids9fds0fi4nrj');
+
+            await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+        }
+
+        return NextResponse.json({ status: 200, articles });
+    } else {
+        let content = prompt.replace('{KEYWORD}', text);
+        // Send keyword to OpenAI
+        const response = await openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [{ role: "user", content: content }],
+            temperature: 0.7,
         });
-
-       // console.log(article);
-       // console.log(text);
-        const params = new URLSearchParams();
-        params.append('keyword', text);
-        params.append('id', article.id);
-        params.append('comment', '.'); // or any value you want to send
-        params.append('featured_image_required', 'No');
-        params.append('additional_image_required', 'No');
-        params.append('expand_article', 'No');
-        params.append('links', '.');
-        params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
-       // params.append('secret_key', 'kdfmnids9fds0fi4I');
-
-        const response = await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-           body: params.toString()
+        aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
+        await prismaClient.godmodeArticles.create({
+            data: {
+                userId,
+                content: aiResponse,
+                batch: batch,
+                keyword: text,
+                articleType: 'lightmode',
+                status: 1,
+            },
         });
-
-        aiResponse = await response.text();
-        console.log(aiResponse); // I console the value as "Accepted"
-        return NextResponse.json({ status: 200, article });
-    }else{
-      let content = prompt.replace('{KEYWORD}', text);
-      // Send keyword to OpenAI
-      const response = await openai.chat.completions.create({
-        model: "gpt-4", // Use GPT-4 or another model
-        messages: [{ role: "user", content: content }],
-        temperature: 0.7,
-      });
-      aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
-      await prismaClient.godmodeArticles.create({
-        data: {
-          userId,
-          content: aiResponse,
-          batch: batch,
-          keyword: text,
-          articleType: 'lightmode',
-          status: 1,
-        },
-      });
-  
-      return NextResponse.json({ status: 200, aiResponse });
+    
+        return NextResponse.json({ status: 200, aiResponse });
     }
 
   } catch (error) {

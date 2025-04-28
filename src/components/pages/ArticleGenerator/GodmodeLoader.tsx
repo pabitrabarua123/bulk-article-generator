@@ -3,6 +3,12 @@ import {
   CircularProgressLabel,
   Text,
   VStack,
+  Spinner,
+  useColorModeValue,
+  Button,
+  Box,
+  Flex,
+  keyframes
 } from "@chakra-ui/react";
 
 // 🆕 Added "Composing Final Article" step
@@ -25,6 +31,12 @@ const EARLY_PHASE_DURATION = 10; // First 3 steps: total 30 seconds
 const LATE_PHASE_STEP_DURATION = (TOTAL_DURATION - EARLY_PHASE_DURATION) / (steps.length - 3); 
 // dynamically split remaining time among remaining steps
 
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
 interface GodmodeLoaderProps {
   isProcessing: boolean;
   progress: number; // 0 to 100
@@ -32,6 +44,10 @@ interface GodmodeLoaderProps {
 
 const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
   if (!isProcessing) return null;
+
+  const spinnerColor = useColorModeValue("blackAlpha.300", "whiteAlpha.300");
+  const bgColor = useColorModeValue("white", "gray.800");
+  const textColor = useColorModeValue("gray.600", "gray.300");
 
   const elapsed = (progress / 100) * TOTAL_DURATION;
   const remaining = TOTAL_DURATION - elapsed;
@@ -58,28 +74,76 @@ const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
     }
   };
 
-  const { label } = getCurrentStep();
+  const { label, index } = getCurrentStep();
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center z-50">
-      <VStack spacing={4}>
-        <CircularProgress
-          value={progress}
-          size="200px"
-          thickness="3px"
-          color="teal.400"
-        >
-          <CircularProgressLabel fontSize="xl">
-            {progress.toFixed(1)}%
-          </CircularProgressLabel>
-        </CircularProgress>
-        { progress < 100 && (
-          <Text fontSize="md" className="text-slate-500">
-           {label}...
-          </Text>
-        )}
-      </VStack>
-    </div>
+    <Box
+      position="fixed"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      bg="rgba(0, 0, 0, 0.7)"
+      zIndex={50}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Box
+        bg={bgColor}
+        p={8}
+        borderRadius="xl"
+        boxShadow="2xl"
+        maxW="500px"
+        w="90%"
+        animation={`${pulse} 2s infinite`}
+      >
+        <VStack spacing={6}>
+          <CircularProgress
+            value={progress}
+            size="180px"
+            thickness="4px"
+            color="teal.400"
+            trackColor="gray.200"
+          >
+            <CircularProgressLabel fontSize="2xl" fontWeight="bold">
+              {progress.toFixed(1)}%
+            </CircularProgressLabel>
+          </CircularProgress>
+
+          {progress < 100 && (
+            <>
+              <Text fontSize="sm" color={textColor} textAlign="center">
+                Your complete batch of articles will be ready in just 20 minutes.
+              </Text>
+
+              <Flex alignItems="center" justifyContent="center" mb={2}>
+                <Spinner size="sm" color="teal.400" mr={3} />
+                <Text fontSize="md" fontWeight="medium" color={textColor}>
+                  {label}...
+                </Text>
+              </Flex>
+
+              <Text fontSize="sm" color={textColor} textAlign="center">
+                We will notify you via email once it's completed.
+                You may go to the dashboard and continue with your work.
+              </Text>
+
+              <Button
+                colorScheme="teal"
+                size="lg"
+                onClick={() => {
+                  window.location.href = '/dashboard';
+                }}
+                w="100%"
+              >
+                Go to Dashboard
+              </Button>
+            </>
+          )}
+        </VStack>
+      </Box>
+    </Box>
   );
 };
 
