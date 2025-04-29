@@ -40,11 +40,10 @@ export const Dashboard = () => {
     queryFn: () => {
       return axios.get<{ data: DashboardData }>("/api/dashboard");
     },
-    queryKey: ["dashboard"],
+    queryKey: ["dashboard"]
   });
 
   const chartData = data?.data.data.charts || [];
-  const trendData = data?.data.data.trend || [];
   const revenue = data?.data.data.revenue;
   const subscriptions = data?.data.data.subscriptions;
   const orders = data?.data.data.orders;
@@ -66,8 +65,6 @@ export const Dashboard = () => {
       }>;
     }
   });
-
-  console.log(articleData);
 
   return (
     <>
@@ -150,6 +147,7 @@ export const Dashboard = () => {
                   </svg>
                 </CardHeader>
                 <CardContent>
+                  
                   <Skeleton isLoaded={!isLoading}>
                     <div className="text-2xl font-bold">
                       {subscriptions?.value || 0}
