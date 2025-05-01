@@ -56,6 +56,51 @@ const ArticleGenerator: React.FC = () => {
 
   const spinnerColor = useColorModeValue("blackAlpha.300", "whiteAlpha.300");
 
+  // Create a reference to store the AbortController so it can be accessed in all functions
+  const abortControllerRef = useRef<AbortController>(new AbortController());
+
+  // Create a cleanup function when component unmounts or navigation occurs
+  useEffect(() => {
+    // Reset abort controller on mount
+    abortControllerRef.current = new AbortController();
+    
+    return () => {
+      // Cleanup function to abort all fetch requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Clear any intervals to prevent memory leaks
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      // Reset processing states to prevent UI from hanging
+      setIsProcessing(false);
+      setIsProcessingGodmode(false);
+      setGodModeLoader(false);
+    };
+  }, []);
+
+  // Listen for navigation events and abort pending requests
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   const {
       data: userData,
       isLoading,
@@ -63,7 +108,9 @@ const ArticleGenerator: React.FC = () => {
     } = useQuery({
       queryKey: ["user"],
       queryFn: async () => {
-        const response = await fetch('/api/user');
+        const response = await fetch('/api/user', {
+          signal: abortControllerRef.current.signal,
+        });
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -87,7 +134,7 @@ const ArticleGenerator: React.FC = () => {
   
   const [text, setText] = useState('');
   const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
-  const [prompt, setPrompt] = useState("Write a detailed and information-dense and seo optimized article in English for the keyword {KEYWORD} in the style of Ernest Hemingway in html. using clear, language without unnecessary grandiose or exaggerations for newspaper. Get to the point, and avoid overly complex or flowery phrasing. Don't use the most natural words. Use the words unique, ensure and utmost less than 3 times. Write article with subheadings formatted in HTML without head or title.");
+  const [prompt, setPrompt] = useState("Write a detailed and information-dense and seo optimized article in English for the keyword {KEYWORD} in html using clear, language without unnecessary grandiose or exaggerations for newspaper. Write article with subheadings formatted in HTML without head or title.");
   const batchRef = useRef("");
   const handleBatchChange = (val: string) => {
     batchRef.current = val; // No re-render happens
@@ -101,6 +148,7 @@ const ArticleGenerator: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(keyword),
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to create article");
@@ -111,7 +159,10 @@ const ArticleGenerator: React.FC = () => {
       //toast.success("Article generated successfully for Keyword: ");
     },
     onError: (error) => {
-      toast.error("Error creating article");
+      // If the error is an abort error, don't show the toast
+      if (error.name !== 'AbortError') {
+        toast.error("Error creating article");
+      }
     },
   });
 
@@ -143,43 +194,68 @@ const ArticleGenerator: React.FC = () => {
     ? batchRef.current
     : "Batch_" + (Math.floor(Math.random() * 9000) + 1000);
 
-    const response = await fetch('/api/article-generator/batch', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({batch: batchValue }),
-    });
+    try {
+      const response = await fetch('/api/article-generator/batch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({batch: batchValue }),
+        signal: abortControllerRef.current.signal,
+      });
 
-    const data = await response.json();
-    batchRef.current = data.assignedBatch;
+      const data = await response.json();
+      batchRef.current = data.assignedBatch;
 
-    const interval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + 0.3, 95)); // Slow continuous progress
-    }, 1000);
+      const interval = setInterval(() => {
+        setProgress((prev) => Math.min(prev + 0.3, 95)); // Slow continuous progress
+      }, 1000);
 
-    for (let i = 0; i < keywords.length; i++) {
-      setCurrentKeyword(keywords[i]);
-      try {
-        await generateArticle.mutateAsync({
-          batch: batchRef.current,
-          text: keywords[i],
-          prompt: prompt,
-          is_godmode: isGodMode,
-        });
-      } catch (error) {
-        console.error(`Error processing keyword "${keywords[i]}":`, error);
-        toast.error(`Error creating article for the keyword: "${keywords[i]}"`);
+      for (let i = 0; i < keywords.length; i++) {
+        // Check if the request was aborted
+        if (abortControllerRef.current.signal.aborted) {
+          throw new Error('Request aborted');
+        }
+
+        setCurrentKeyword(keywords[i]);
+        try {
+          await generateArticle.mutateAsync({
+            batch: batchRef.current,
+            text: keywords[i],
+            prompt: prompt,
+            is_godmode: isGodMode,
+          });
+        } catch (error: any) {
+          // If the request was aborted, stop the loop
+          if (error.name === 'AbortError' || abortControllerRef.current.signal.aborted) {
+            clearInterval(interval);
+            setIsProcessing(false);
+            return;
+          }
+          console.error(`Error processing keyword "${keywords[i]}":`, error);
+          toast.error(`Error creating article for the keyword: "${keywords[i]}"`);
+        }
+        
+        let progressPercent = ((i + 1) / keywords.length) * 100;
+        setProgress(progressPercent); // Jump to the actual progress when result is received
       }
       
-      let progressPercent = ((i + 1) / keywords.length) * 100;
-      setProgress(progressPercent); // Jump to the actual progress when result is received
+      clearInterval(interval);
+      updateBalance(keywords.length);
+      
+      // Only navigate if the component is still mounted and the request wasn't aborted
+      if (!abortControllerRef.current.signal.aborted) {
+        router.push(`/articles?batch=${batchRef.current}`);
+      }
+    } catch (error: any) {
+      // Handle abort errors silently
+      if (error.name !== 'AbortError' && error.message !== 'Request aborted') {
+        console.error("Error:", error);
+        toast.error("Error processing keywords");
+      }
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
-    clearInterval(interval);
-    updateBalance(keywords.length);
-    router.push(`/articles?batch=${batchRef.current}`);
-    console.log("All requests finished!");
   };
 
   const godModeArticleIds = useRef<string[]>([]);
@@ -214,22 +290,28 @@ const ArticleGenerator: React.FC = () => {
     setGodModeLoader(true);
     start25MinLoader(); // 🔥 Start the 25-min loader here
 
-    const batchValue = batchRef.current && batchRef.current.trim() !== ''
-    ? batchRef.current
-    : "Batch_" + (Math.floor(Math.random() * 9000) + 1000);
-
-    const response = await fetch('/api/article-generator/batch', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({batch: batchValue }),
-    });
-
-    const data = await response.json();
-    batchRef.current = data.assignedBatch;
-  
     try {
+      const batchValue = batchRef.current && batchRef.current.trim() !== ''
+      ? batchRef.current
+      : "Batch_" + (Math.floor(Math.random() * 9000) + 1000);
+
+      const response = await fetch('/api/article-generator/batch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({batch: batchValue }),
+        signal: abortControllerRef.current.signal,
+      });
+
+      // Check if the request was aborted
+      if (abortControllerRef.current.signal.aborted) {
+        throw new Error('Request aborted');
+      }
+
+      const data = await response.json();
+      batchRef.current = data.assignedBatch;
+    
       const res = await generateArticle.mutateAsync({
         batch: batchRef.current,
         text: keywords.join('\n'),
@@ -242,9 +324,19 @@ const ArticleGenerator: React.FC = () => {
       
       console.log(godModeArticleIds.current);
       updateBalance(keywords.length);
-    } catch (error) {
-      console.error("Error processing keywords:", error);
-      toast.error("Error creating articles");
+    } catch (error: any) {
+      // Handle abort errors silently
+      if (error.name !== 'AbortError' && error.message !== 'Request aborted') {
+        console.error("Error processing keywords:", error);
+        toast.error("Error creating articles");
+      }
+      
+      // Always clean up when there's an error
+      setIsProcessingGodmode(false);
+      setGodModeLoader(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     }
   };
 
@@ -257,6 +349,12 @@ const ArticleGenerator: React.FC = () => {
     if (timerRef.current) clearInterval(timerRef.current);
   
     timerRef.current = setInterval(() => {
+      // Check if the request was aborted
+      if (abortControllerRef.current.signal.aborted) {
+        clearInterval(timerRef.current!);
+        return;
+      }
+
       secondsPassed++;
       const percent = (secondsPassed / duration) * 100;
       setProgressGodmode(percent);
@@ -284,6 +382,7 @@ const ArticleGenerator: React.FC = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({keywords: godModeArticleIds.current}),
+      signal: abortControllerRef.current.signal,
     }).then(response => response.json())
       .then(data => {
         console.log(data.res);
@@ -301,7 +400,12 @@ const ArticleGenerator: React.FC = () => {
           setGodmodeStatus('Incomplete');
          }
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        // Ignore abort errors
+        if (error.name !== 'AbortError') {
+          console.error('Error:', error);
+        }
+      });
   }
 
   useEffect(() => {
@@ -314,24 +418,31 @@ const ArticleGenerator: React.FC = () => {
   
 
   const updateBalance = async (no_of_keyword: number) => {
-    await fetch("/api/article-generator", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: 'update_balance', 
-        no_of_keyword: no_of_keyword, 
-        balance: balance.credits, 
-        balance_type: balance.balance_type,
-      }),
-    }).then(response => response.json())
-      .then(data => {
-        if(data.status === 'success'){
-            setBalance({...balance, credits: balance.credits - no_of_keyword})
-        }
-      })   // Handle the data
-      .catch(error => console.error('Error:', error));
+    try {
+      const response = await fetch("/api/article-generator", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: 'update_balance', 
+          no_of_keyword: no_of_keyword, 
+          balance: balance.credits, 
+          balance_type: balance.balance_type,
+        }),
+        signal: abortControllerRef.current.signal,
+      });
+      
+      const data = await response.json();
+      if(data.status === 'success'){
+          setBalance({...balance, credits: balance.credits - no_of_keyword});
+      }
+    } catch (error: any) {
+      // Ignore abort errors
+      if (error.name !== 'AbortError') {
+        console.error('Error:', error);
+      }
+    }
   }
 
   const [isPricingPopupOpen, setIsPricingPopupOpen] = useState<boolean>(false);

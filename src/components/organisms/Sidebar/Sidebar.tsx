@@ -7,6 +7,7 @@ import { useMobile } from "@/hooks/useMobile";
 import { MenuLabel, SidebarMenuItems } from "./SidebarMenuItems";
 import { DarkModeSwitch } from "@/components/DarkModeSwitch/DarkModeSwitch";
 import { useColorModeValues } from "@/hooks/useColorModeValues";
+import { usePathname } from "next/navigation";
 
 export const sidebarWidth = "240px";
 
@@ -17,12 +18,15 @@ type SideBarProps = {
 export const SideBar: React.FC<SideBarProps> = ({ currentPage }) => {
   const isMobile = useMobile();
   const { borderColor } = useColorModeValues();
-
+  const pathname = usePathname();
   const { data: session } = useSession();
 
-  const [loadingRoute, setLoadingRoute] = React.useState<Routes | string>(
-    "" as Routes
-  );
+  const [loadingRoute, setLoadingRoute] = React.useState<Routes | string>("");
+
+  // Clear loading state when pathname changes
+  React.useEffect(() => {
+    setLoadingRoute("");
+  }, [pathname]);
 
   return (
     <Flex

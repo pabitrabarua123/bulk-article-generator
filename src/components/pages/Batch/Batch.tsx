@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   Text,
@@ -76,8 +76,16 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 
 const Batch: React.FC = () => {
-
   const router = useRouter();
+
+  const abortController = new AbortController();
+
+  useEffect(() => {
+    return () => {
+      // Cleanup function to abort fetch requests
+      abortController.abort();
+    };
+  }, []);
 
   const {
     data: todosData,
@@ -86,7 +94,9 @@ const Batch: React.FC = () => {
   } = useQuery({
     queryKey: ["batch"],
     queryFn: async () => {
-      const response = await fetch("/api/article-generator/batch");
+      const response = await fetch("/api/article-generator/batch", {
+        signal: abortController.signal,
+      });
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -107,6 +117,7 @@ const Batch: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedTodo),
+        signal: abortController.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to update todo");

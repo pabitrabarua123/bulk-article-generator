@@ -14,8 +14,25 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 export const queryClient = new QueryClient();
+
+// Custom hook to handle route changes and cancel queries
+export function useRouteChangeHandler() {
+  const pathname = usePathname();
+  
+  useEffect(() => {
+    // When the route changes, cancel all pending queries
+    return () => {
+      // This runs when the pathname changes (navigation)
+      queryClient.cancelQueries();
+    };
+  }, [pathname]);
+  
+  return null;
+}
 
 export function Providers({
   children,
@@ -44,9 +61,9 @@ export function Providers({
             attribute="class"
             defaultTheme={uiColorMode}
             enableSystem
-            disableTransitionOnChange
           >
             <ColorModeScript initialColorMode={uiColorMode} />
+            <RouteChangeHandler />
             <ChakraProvider
               theme={theme}
               colorModeManager={cookieStorageManager}
@@ -58,4 +75,10 @@ export function Providers({
       </QueryClientProvider>
     </SessionProvider>
   );
+}
+
+// Component to handle route changes
+function RouteChangeHandler() {
+  useRouteChangeHandler();
+  return null;
 }

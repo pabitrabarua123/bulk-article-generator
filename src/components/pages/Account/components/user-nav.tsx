@@ -49,9 +49,6 @@ export function UserNav() {
             <DropdownMenuItem onClick={() => onLoadCustomerPortal()}>
               Billing
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowNewWorkspaceDialog(true)}>
-              New Workspace
-            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Log out</DropdownMenuItem>

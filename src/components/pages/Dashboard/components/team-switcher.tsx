@@ -62,14 +62,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
                 value: "personal",
               },
             ],
-          },
-          {
-            label: "Workspaces",
-            teams: workspaces?.map((workspace) => ({
-              label: workspace.name,
-              value: workspace.id,
-            })),
-          },
+          }
         ];
 
         setGroups(groups as Group[]);
@@ -85,7 +78,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
   return (
     <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        {/* <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
@@ -101,13 +94,13 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
               />
               <AvatarFallback>SC</AvatarFallback>
             </Avatar>
-            {selectedTeam?.label}
+            Welcome {selectedTeam?.label}
             <TbSelector className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
-        </PopoverTrigger>
+        </PopoverTrigger> */}
+        <p className="text-sm pl-[20px]">Welcome {selectedTeam?.label}</p>
         <PopoverContent className="w-[200px] p-0">
           <Command>
-            <CommandInput placeholder="Search workspace..." />
             <CommandList>
               <CommandEmpty>No workspace found.</CommandEmpty>
               {groups.map((group) => (
@@ -143,22 +136,8 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
                 </CommandGroup>
               ))}
             </CommandList>
-            <CommandSeparator />
-            <CommandList>
-              <CommandGroup>
-                <DialogTrigger asChild>
-                  <CommandItem
-                    onSelect={() => {
-                      setOpen(false);
-                      setShowNewTeamDialog(true);
-                    }}
-                  >
-                    <TbCirclePlus className="mr-2 h-5 w-5" />
-                    Create Workspace
-                  </CommandItem>
-                </DialogTrigger>
-              </CommandGroup>
-            </CommandList>
+            
+
           </Command>
         </PopoverContent>
       </Popover>

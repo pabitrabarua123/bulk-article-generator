@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Link as NextJsChakraLink } from "@chakra-ui/next-js";
@@ -22,6 +22,7 @@ import {
 import { Routes } from "../../../data/routes";
 import { brandName, cannyUrl } from "@/config";
 import { Logo } from "@/components/atoms/Logo/Logo";
+import { useRouter } from "next/navigation";
 
 type MenuItemProps = {
   route?: Routes | string;
@@ -47,6 +48,18 @@ export const MenuItem: React.FC<MenuItemProps> = ({
 
   const isActive = currentPage === route;
   const href = route && route.startsWith("http") ? route : `${route}`;
+  
+  const handleClick = (e: React.MouseEvent) => {
+    if (route && !isActive && !isExternal && href.startsWith("/")) {
+      onClick(route);
+    }
+    if (!route) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  };
+
   return (
     <chakra.div
       w="100%"
@@ -125,16 +138,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
                 stroke: isActive ? "brand.600" : menuItemColor,
               },
             }}
-            onClick={(e) => {
-              if (route && !isActive && !isExternal && href.startsWith("/")) {
-                onClick(route);
-              }
-              if (!route) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-              }
-            }}
+            onClick={handleClick}
           >
             {children}
           </ChakraLink>
@@ -188,6 +192,21 @@ export const SidebarMenuItems: React.FC<MenuProps> = ({
   onMenuItemClick,
 }) => {
   const sectionColor = useColorModeValue("blackAlpha.900", "whiteAlpha.900");
+  const router = useRouter();
+
+  // Prefetch routes on component mount
+  useEffect(() => {
+    const routesToPrefetch = [
+      Routes.dashboard,
+      Routes.articlegenerator,
+      Routes.batch,
+      Routes.account,
+    ];
+    
+    routesToPrefetch.forEach(route => {
+      router.prefetch(route);
+    });
+  }, [router]);
 
   return (
     <Box p="0" width="100%">

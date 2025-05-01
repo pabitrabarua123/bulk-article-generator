@@ -46,58 +46,39 @@ export async function GET(req: NextRequest) {
     const userId = session.user.id;
     const currentYear = new Date().getFullYear();
 
-    // Execute all queries in parallel
-    const [
-      godmodeCount,
-      litemodeCount,
-      uniqueBatches,
-      monthlyData
-    ] = await Promise.all([
-      // Count God Mode articles
-      prismaClient.godmodeArticles.count({
-        where: { userId, articleType: 'godmode' }
-      }),
-      
-      // Count Lite Mode articles
-      prismaClient.godmodeArticles.count({
-        where: { userId, articleType: 'lightmode' }
-      }),
-
-      // Get unique batches
-      prismaClient.godmodeArticles.groupBy({
-        by: ['batch'],
-        where: { userId }
-      }),
-
-      // Get monthly data in a single query
-      prismaClient.godmodeArticles.groupBy({
-        by: ['createdAt'],
-        where: {
-          userId,
-          createdAt: {
-            gte: new Date(currentYear, 0, 1),
-            lte: new Date(currentYear, 11, 31)
-          }
-        },
-        _count: true
-      })
-    ]);
-
-    // Process monthly data
-    const charts = Array.from({ length: 12 }, (_, i) => {
-      const monthStart = new Date(currentYear, i, 1);
-      const monthEnd = new Date(currentYear, i + 1, 0);
-      
-      const monthData = monthlyData.filter(data => {
-        const date = new Date(data.createdAt);
-        return date >= monthStart && date <= monthEnd;
-      });
-
-      return {
-        name: new Date(currentYear, i).toLocaleString('default', { month: 'short' }),
-        total: monthData.reduce((sum, data) => sum + (data._count || 0), 0)
-      };
+    // Get counts and monthly data in a single optimized query
+    const result = await prismaClient.godmodeArticles.groupBy({
+      by: ['articleType', 'batch', 'createdAt'],
+      where: { 
+        userId,
+        createdAt: {
+          gte: new Date(currentYear, 0, 1),
+          lte: new Date(currentYear, 11, 31)
+        }
+      },
+      _count: true
     });
+
+    // Process the data efficiently
+    const godmodeCount = result.filter(r => r.articleType === 'godmode')
+      .reduce((sum, r) => sum + (r._count || 0), 0);
+    const litemodeCount = result.filter(r => r.articleType === 'lightmode')
+      .reduce((sum, r) => sum + (r._count || 0), 0);
+    const uniqueBatches = Array.from(new Set(result.map(r => r.batch)));
+
+    // Process monthly data efficiently
+    const monthlyCounts = new Array(12).fill(0);
+    result.forEach(r => {
+      const date = new Date(r.createdAt);
+      if (date.getFullYear() === currentYear) {
+        monthlyCounts[date.getMonth()] += r._count || 0;
+      }
+    });
+
+    const charts = monthlyCounts.map((total, i) => ({
+      name: new Date(currentYear, i).toLocaleString('default', { month: 'short' }),
+      total
+    }));
 
     const data: DashboardData = {
       revenue: {
