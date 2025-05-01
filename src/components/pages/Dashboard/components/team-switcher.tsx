@@ -98,7 +98,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
             <TbSelector className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger> */}
-        <p className="text-sm pl-[20px]">Welcome {selectedTeam?.label}</p>
+        <p className="text-sm pl-[20px]">{selectedTeam?.label && `Welcome ${selectedTeam.label}`}</p>
         <PopoverContent className="w-[200px] p-0">
           <Command>
             <CommandList>

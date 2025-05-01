@@ -120,7 +120,7 @@ export const AccountMenu = ({
           <Flex mr="8px">
             <TbCreditCard size="16px" />
           </Flex>
-          Billing 11
+          Billing
         </MenuItem>
 
         <MenuItem

@@ -725,6 +725,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
          isOpen={isTimerPopupOpen} 
          onClose={closeTimerPopup}
          openPricingPopup={openPricingPopup}
+         isGodMode={isGodMode}
         />
      )}
 
@@ -737,11 +738,13 @@ export default ArticleGenerator;
 const TimerPopup = ({
   isOpen,
   onClose,
-  openPricingPopup
+  openPricingPopup,
+  isGodMode
 }: {
   isOpen: boolean;
   onClose: () => void;
   openPricingPopup: () => void;
+  isGodMode: boolean;
 }) => {
 
   return (
@@ -750,10 +753,19 @@ const TimerPopup = ({
         <div className="grid gap-4 py-4">
           <div className="flex items-center">
             <div style={{textAlign: 'center', width: '100%'}}>
-             <LuTimerReset style={{fontSize: '100px', color: '#76e4f7', display: 'inline'}}/>
-             <br/><br/>
-             <p>Credits will refill in next</p>
-             <p>24 hours</p>
+             { !isGodMode &&
+             <>
+              <LuTimerReset style={{fontSize: '100px', color: '#76e4f7', display: 'inline'}}/>
+              <br/><br/>
+             </>
+             } 
+             {isGodMode ? 
+             <>
+              <h3 className="text-2xl font-bold mb-4">Trial Balance has expired</h3>
+              <p>Please updgrade to generate more god mode articles.</p>
+             </>
+             :
+             'Credits will refill in next 24 hours'}
              <br/>
              <Button
                type="button"
