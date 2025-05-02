@@ -21,6 +21,8 @@ import axios from "axios";
 import { DashboardData } from "@/app/api/dashboard/route";
 import { TrendChart } from "./components/trend-chart";
 import { GodmodeArticles } from "@prisma/client";
+import { useRouter } from "next/navigation";
+import { TbCrown, TbBolt, TbFileText } from "react-icons/tb";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -43,6 +45,7 @@ export const Dashboard = () => {
     queryKey: ["dashboard"]
   });
 
+  const router = useRouter();
   const chartData = data?.data.data.charts || [];
   const revenue = data?.data.data.revenue;
   const subscriptions = data?.data.data.subscriptions;
@@ -89,11 +92,47 @@ export const Dashboard = () => {
               </div>
             </div>
 
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
+              <Card className="cursor-pointer" onClick={() => router.push("/article-generator")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-lg font-xl">
+                    Generate God Mode articles
+                  </CardTitle>
+                  <TbCrown className="h-6 w-6 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="text-sm text-slate-500">
+                  These are articles of extremely high quality written after in depth research. 
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer" onClick={() => router.push("/article-generator")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-lg font-xl">Generate Lite Mode Articles</CardTitle>
+                  <TbBolt className="h-6 w-6 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="text-sm text-slate-500">
+                  These are free to generate articles good for guest posting and other purposes. 
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer" onClick={() => router.push("/batch")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-lg font-xl">
+                    Generated Articles
+                  </CardTitle>
+                  <TbFileText className="h-6 w-6 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="text-sm text-slate-500">
+                  Find your previously generated articles here.
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                  God Mode Articles
+                    God Mode Articles
                   </CardTitle>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +167,7 @@ export const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                   Lite Mode Articles
+                    Lite Mode Articles
                   </CardTitle>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -196,7 +235,7 @@ export const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                  Batches
+                    Batches
                   </CardTitle>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
