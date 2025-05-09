@@ -184,9 +184,7 @@ const ArticleGenerator: React.FC = () => {
       }
       
       clearInterval(interval);
-      //updateBalance(keywords.length);
-      
-        router.push(`/articles?batchId=${data.assignedBatch}`);
+      router.push(`/articles?batchId=${data.assignedBatch}`);
       
     } catch (error: any) {
       console.error("Error:", error);
@@ -256,7 +254,6 @@ const ArticleGenerator: React.FC = () => {
       godModeArticleIds.current = res.articles.map((article: any) => article.id);
       
       console.log(godModeArticleIds.current);
-      //updateBalance(keywords.length);
     } catch (error: any) {
       console.error("Error processing keywords:", error);
       // Always clean up when there's an error
@@ -270,7 +267,7 @@ const ArticleGenerator: React.FC = () => {
 
   const start25MinLoader = () => {
     setProgressGodmode(0); // reset
-    const duration = 120; // 1500 seconds
+    const duration = 1500; // 1500 seconds
     let secondsPassed = 0;
     let apiCalled = false; // ensure it's called only once
   
@@ -337,33 +334,6 @@ const ArticleGenerator: React.FC = () => {
     }
   }, [godmodeArticleRemain, GodModeLoader]);
   
-
-  const updateBalance = async (no_of_keyword: number) => {
-    try {
-      const response = await fetch("/api/article-generator", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: 'update_balance', 
-          no_of_keyword: no_of_keyword, 
-          balance: balance.credits, 
-          balance_type: balance.balance_type,
-        })
-      });
-      
-      const data = await response.json();
-      if(data.status === 'success'){
-          setBalance({...balance, credits: balance.credits - no_of_keyword});
-      }
-    } catch (error: any) {
-      // Ignore abort errors
-      if (error.name !== 'AbortError') {
-        console.error('Error:', error);
-      }
-    }
-  }
 
   const [isPricingPopupOpen, setIsPricingPopupOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("monthly")
@@ -489,7 +459,7 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
     { isLoading ? <Spinner size="xs" color={spinnerColor} mr="16px" /> 
     : 
     <>
-    {balance.balance_text}: {balance.credits + ' Articles'}{ user && user?.LiteModeBalance > 0 ? '' : '/30 Articles'}
+    {balance.balance_text}: {balance.credits }{ user && user?.LiteModeBalance > 0 ? '' : '/30 Articles'}
     </>
     }
   </Text>
