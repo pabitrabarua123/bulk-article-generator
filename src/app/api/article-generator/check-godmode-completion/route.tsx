@@ -20,14 +20,14 @@ export async function POST(request: Request) {
 
     let contentFilled = 0;
     let contentFilledKeywords = [];
-    let batch = '';
+    //let batch = '';
 
     for(let i = 0; i < keywords.length; i++){
       let article = await prismaClient.godmodeArticles.findUnique({
         where: { id: keywords[i] }
       });
       if(article){
-          batch = article.batch;
+          //batch = article.batchId;
           if(article.content){
              await prismaClient.godmodeArticles.update({
                where: { id: article.id },
@@ -39,39 +39,15 @@ export async function POST(request: Request) {
              contentFilledKeywords.push(article.keyword);
           }
       }
-    }
-
-    const sendMail = async (subject: string, text1: string) => {
-      await sendTransactionalEmail({
-        transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-        email: session.user?.email,
-        dataVariables: {
-          text1: text1,
-          subject: subject,
-          batch: batch
-        },
-      });
-    }   
-
-    let subject = '';
-    let text1 = '';
+    } 
 
     if(contentFilled === keywords.length){
-      text1 = `${keywords.length} Articles generated on Godmode are now ready`;
-      subject = `Articles generated in ${batch} are now completed`;
-      await sendMail(subject, text1);
       return NextResponse.json({ status: 200, res: 'Full', contentFilledKeywords });
     }
     if(contentFilled !== keywords.length && contentFilled > 0){
-      text1 = `${String(contentFilled)} Articles generated on Godmode are now ready. ${String(keywords.length - contentFilled)} Articles are still in progress, we will email you when they are done.`;
-      subject = `Articles generated in ${batch} are partially completed`;
-      await sendMail(subject, text1);
       return NextResponse.json({ status: 200, res: 'Partial', contentFilledKeywords, remainingKeywords: keywords.length - contentFilled });
     }
     if(contentFilled === 0){
-      text1 = `${String(keywords.length)} Articles Generated on God mode will be completed in another 20 minutes`;
-      subject = `Article Generation for ${batch} is taking longer than expected`;
-      await sendMail(subject, text1);
       return NextResponse.json({ status: 200, res: 'Incomplete', remainingKeywords: keywords.length });
     }
   } catch (error) {

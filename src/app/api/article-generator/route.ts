@@ -13,9 +13,9 @@ async function getAllArticles(userId: string) {
 }
 
 // Function to get articles by batch for a user
-async function getArticlesByBatch(userId: string, batch: string) {
+async function getArticlesByBatch(userId: string, batchId: string) {
   return await prismaClient.godmodeArticles.findMany({
-    where: { userId, batch },
+    where: { userId, batchId: batchId },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const userId = session?.user.id as string;
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    const batch = searchParams.get("batch");
+    const batchId = searchParams.get("batchId");
 
     let todos;
 
@@ -49,10 +49,13 @@ export async function GET(req: NextRequest) {
       if (!article) {
         return NextResponse.json({ error: "Article not found" }, { status: 404 });
       }
-      return NextResponse.json({ todos: [article] }); // Wrap in an array for consistency
-    } else if (batch) {
+      const batch = await prismaClient.batch.findUnique({
+        where: { id: article.batchId },
+      });
+      return NextResponse.json({ todos: [article], batch_name: batch?.name }); // Wrap in an array for consistency
+    } else if (batchId) {
       // Fetch articles filtered by batch for the logged-in user
-      todos = await getArticlesByBatch(userId, batch);
+      todos = await getArticlesByBatch(userId, batchId);
     } else {
       // Fetch all articles for the logged-in user
       todos = await getAllArticles(userId);
@@ -81,7 +84,7 @@ export async function POST(request: Request) {
   const userId = session?.user.id as string;
   
   try {
-    const {batch, text, prompt, is_godmode} = await request.json();
+    const {batchId, text, prompt, is_godmode, balance_type, no_of_keyword} = await request.json();
     if (!text || typeof text !== "string") {
       return NextResponse.json({ error: "Invalid keyword" }, { status: 400 });
     }
@@ -92,14 +95,25 @@ export async function POST(request: Request) {
         const articles = [];
 
         for (const keyword of keywords) {
-            let article = await prismaClient.godmodeArticles.create({
+             let article = await prismaClient.godmodeArticles.create({
                 data: {
                     userId,
-                    batch: batch,
+                    batchId: batchId,
                     keyword: keyword,
                     articleType: 'godmode'
                 },
             });
+
+            // Create corresponding pending article entry
+            await prismaClient.pendingGodmodeArticles.create({
+                data: {
+                    userId,
+                    keywordId: keyword,
+                    batchId: batchId,
+                    cronRequest: 0
+                }
+            });
+
             articles.push(article);
 
             const params = new URLSearchParams();
@@ -110,9 +124,10 @@ export async function POST(request: Request) {
             params.append('additional_image_required', 'No');
             params.append('expand_article', 'No');
             params.append('links', '.');
-            //params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
-           params.append('secret_key', 'kdfmnids9fds0fi4nrj');
+         //   params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+            params.append('secret_key', 'kdfmnids9fds0fi4nrjr');
 
+            // Await the webhook call before continuing
             await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -120,6 +135,7 @@ export async function POST(request: Request) {
             });
         }
 
+        // Respond to the client after all webhooks finish
         return NextResponse.json({ status: 200, articles });
     } else {
         let content = prompt.replace('{KEYWORD}', text);
@@ -134,11 +150,21 @@ export async function POST(request: Request) {
             data: {
                 userId,
                 content: aiResponse,
-                batch: batch,
+                batchId: batchId,
                 keyword: text,
-                articleType: 'lightmode',
+                articleType: 'liteMode',
                 status: 1,
             },
+        });
+
+        // Perform the update in a single query by calculating the updated balance directly
+        const updated = await prismaClient.user.update({
+          where: { id: userId },
+          data: {
+            [balance_type]: {
+              decrement: no_of_keyword,
+            },
+          },
         });
     
         return NextResponse.json({ status: 200, aiResponse });
@@ -159,23 +185,6 @@ export async function PUT(request: Request) {
     const userId = session?.user.id as string;
 
     const request_data = await request.json();
-    
-    if(request_data.type === 'update_balance'){
-      const balanceField = request_data.balance_type;
-      console.log(balanceField);
-
-      const updated = await prismaClient.user.update({
-        where: { id: userId },
-        data: {
-          [balanceField]: (request_data.balance - request_data.no_of_keyword),
-        },
-      });
-      if(updated){
-        return NextResponse.json({ status: 'success' });
-      }else{
-        return NextResponse.json({ status: 'failure' });
-      }
-    }
 
     if(request_data.type === 'article_upadte'){
       console.log(request_data.aiScore);

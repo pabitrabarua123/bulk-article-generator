@@ -280,7 +280,7 @@ export const Dashboard = () => {
                 <CardHeader>
                   <CardTitle>Recent Articles</CardTitle>
                   <CardDescription>
-                    You made total {articleData && articleData.todos.length} keywords.
+                    {articleData && `You made total ${articleData.todos.length} keywords.`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

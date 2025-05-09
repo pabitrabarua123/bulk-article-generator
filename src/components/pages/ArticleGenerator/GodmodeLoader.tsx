@@ -10,6 +10,7 @@ import {
   Flex,
   keyframes
 } from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
 
 // 🆕 Added "Composing Final Article" step
 const steps = [
@@ -26,7 +27,7 @@ const steps = [
   "Composing Final Article"
 ];
 
-const TOTAL_DURATION = 1500; // in seconds (25 minutes)
+const TOTAL_DURATION = 120; // in seconds (25 minutes)
 const EARLY_PHASE_DURATION = 10; // First 3 steps: total 30 seconds
 const LATE_PHASE_STEP_DURATION = (TOTAL_DURATION - EARLY_PHASE_DURATION) / (steps.length - 3); 
 // dynamically split remaining time among remaining steps
@@ -46,6 +47,7 @@ const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
   const spinnerColor = useColorModeValue("blackAlpha.300", "whiteAlpha.300");
   const bgColor = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.600", "gray.300");
+  const router = useRouter();
 
   if (!isProcessing) return null;
 
@@ -132,9 +134,7 @@ const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
               <Button
                 colorScheme="teal"
                 size="lg"
-                onClick={() => {
-                  window.location.href = '/dashboard';
-                }}
+                onClick={() => router.push('/dashboard')}
                 w="100%"
               >
                 Go to Dashboard

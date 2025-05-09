@@ -5,8 +5,18 @@
 .chakra-ui-dark .ql-snow .ql-stroke {
     stroke: #64748b !important;
 }
-.ql-editor {
-    color: #64748b;
+
+body.chakra-ui-light .ql-editor {
+    color: #4a505b;
+}
+body.chakra-ui-dark .ql-editor {
+    color: #ffffff;
+}
+body.chakra-ui-light .godmod-progress {
+    background: #fff;
+}
+body.chakra-ui-dark .godmod-progress {
+    background: #1a202c;
 }
 .ql-container.ql-snow {
     height: calc(100vh - 152px);
@@ -69,6 +79,14 @@ body.chakra-ui-light .custom-btn-1:hover {
 }
 .ql-editor p {
     margin-bottom: 10px !important;
+    font-size: 15px;
+    line-height: 24px;
+}
+.ql-editor ol > li, .ql-editor ul > li {
+    list-style-type: none;
+    font-size: 15px;
+    line-height: 24px;
+    margin-bottom: 10px;
 }
 .ql-editor h1,
 .ql-editor h2, 
@@ -76,6 +94,7 @@ body.chakra-ui-light .custom-btn-1:hover {
 .ql-editor h4,
 .ql-editor h5 {
     margin-bottom: 13px !important;
+    font-weight: 700;
 }
 /* Scrollbar Styling for Webkit Browsers */
 .ql-editor::-webkit-scrollbar {

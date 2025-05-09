@@ -14,12 +14,12 @@ export async function GET(req: NextRequest) {
 
     const userId = session?.user.id as string;
     const groupedArticles = await prismaClient.godmodeArticles.groupBy({
-        by: ['batch'],
+        by: ['batchId'],
         where: {
           userId: session?.user?.id,
         },
         _count: {
-           batch: true,
+           batchId: true,
         },
         _max: {
            createdAt: true,
@@ -31,9 +31,21 @@ export async function GET(req: NextRequest) {
         },
       });
       
-      console.log(groupedArticles);
+    // Fetch all batch names for the batchIds
+    const batchIds = groupedArticles.map((group) => group.batchId);
+    const batches = await prismaClient.batch.findMany({
+      where: { id: { in: batchIds } },
+      select: { id: true, name: true },
+    });
+    const batchIdToName = Object.fromEntries(batches.map(b => [b.id, b.name]));
 
-    let todos = groupedArticles;
+    // Attach batch name to each group
+    const todos = groupedArticles.map(group => ({
+      ...group,
+      id: group.batchId,
+      updatedAt: group._max?.createdAt,
+      batch: batchIdToName[group.batchId] || group.batchId, // fallback to id if name missing
+    }));
 
     return NextResponse.json({ todos });
   } catch (error) {
@@ -52,7 +64,8 @@ export async function POST(request: Request) {
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { batch } = await request.json();
+  const { batch, articleType, articles } = await request.json();
+  const userId = session?.user.id as string;
   if (!batch) {
     return NextResponse.json({ error: "Batch is not there" }, { status: 401 });
   }
@@ -62,8 +75,8 @@ export async function POST(request: Request) {
     let suffix = 1;
 
     // Check if the batch name exists
-    let exists = await prismaClient.godmodeArticles.findFirst({
-        where: { batch: finalBatchName }
+    let exists = await prismaClient.batch.findFirst({
+        where: { name: finalBatchName }
     });
 
     // If exists, keep incrementing a suffix until it's unique
@@ -71,12 +84,25 @@ export async function POST(request: Request) {
         finalBatchName = `${batch}${suffix}`;
         suffix++;
 
-        exists = await prismaClient.godmodeArticles.findFirst({
-            where: { batch: finalBatchName }
+        exists = await prismaClient.batch.findFirst({
+            where: { name: finalBatchName }
         });
     }
 
-    return NextResponse.json({ status: 200, assignedBatch: finalBatchName });
+    let batch_created = await prismaClient.batch.create({
+      data: {
+        userId,
+        name: finalBatchName,
+        articleType: articleType,
+        articles: articles,
+        completed_articles: 0,
+        pending_articles: articles,
+        failed_articles: 0,
+        status: 0,
+      },
+   });
+
+    return NextResponse.json({ status: 200, assignedBatch: batch_created.id });
   } catch (error) {
     console.error("Error creating batch:", error);
     return NextResponse.json(

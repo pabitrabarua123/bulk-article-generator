@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     // Get counts and monthly data in a single optimized query
     const result = await prismaClient.godmodeArticles.groupBy({
-      by: ['articleType', 'batch', 'createdAt'],
+      by: ['articleType', 'batchId', 'createdAt'],
       where: { 
         userId,
         createdAt: {
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
       .reduce((sum, r) => sum + (r._count || 0), 0);
     const litemodeCount = result.filter(r => r.articleType === 'lightmode')
       .reduce((sum, r) => sum + (r._count || 0), 0);
-    const uniqueBatches = Array.from(new Set(result.map(r => r.batch)));
+    const uniqueBatches = Array.from(new Set(result.map(r => r.batchId)));
 
     // Process monthly data efficiently
     const monthlyCounts = new Array(12).fill(0);

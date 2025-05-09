@@ -12,7 +12,9 @@ import {
   Switch,
   Box,
   Icon,
-  useColorMode
+  useColorMode,
+  useColorModeValue,
+  Spinner
 } from "@chakra-ui/react";
 import {
   TbArrowBackUp,
@@ -29,12 +31,13 @@ import { HStack, Stack, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-u
 import Link from 'next/link';
 import { Logo1 } from "../../atoms/Logo1/Logo1";
 import ScoreMeter from './ScoreMeter';
-import { MdCheckCircle, MdOutlineTextSnippet, MdAutoGraph } from 'react-icons/md';
+import { MdCheckCircle, MdOutlineTextSnippet, MdAutoGraph, MdSmartToy } from 'react-icons/md';
 import { syllable } from 'syllable';
 
 const Keyword = ({id}: {id: string}) => {
 
   const { colorMode, toggleColorMode } = useColorMode();
+  const spinnerColor = useColorModeValue("blackAlpha.300", "whiteAlpha.300");
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -57,11 +60,14 @@ const Keyword = ({id}: {id: string}) => {
       }
       return response.json() as Promise<{
         todos: (Omit<GodmodeArticles, "updatedAt"> & { updatedAt: string })[];
+        batch_name: string;
       }>;
     }
   });
 
   const todos = React.useMemo(() => todosData?.todos || [], [todosData]);
+  const batch_name = React.useMemo(() => todosData?.batch_name || '', [todosData]);
+  console.log(batch_name);
   const [editorText, setEditorText] = React.useState('');
   const [wordCount, setWordCount] = useState(0);
 
@@ -140,10 +146,17 @@ const Keyword = ({id}: {id: string}) => {
     },
   });
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleUpdateTodo = async (
     todo: {id: string, content: string, aiScore?: number | null, type: string}
   ) => {
-    return await updateTodoMutation.mutateAsync(todo);
+    setIsSaving(true);
+    try {
+      await updateTodoMutation.mutateAsync(todo);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const copyContent = () => {
@@ -241,7 +254,7 @@ const Keyword = ({id}: {id: string}) => {
             ))}
            </Heading>
            <Text className="text-slate-500 text-sm mt-[5px]">
-            <Link href={`/articles?batch=${todos[0].batch}`}>{todos[0].batch}</Link> / {todos[0].keyword} 
+            <Link href={`/articles?batchId=${todos[0].batchId}`}>{batch_name}</Link> / {todos[0].keyword} 
            </Text>
           </div>
         </div>
@@ -250,17 +263,21 @@ const Keyword = ({id}: {id: string}) => {
             <div className="flex gap-x-4">
               <div className="flex-[2] relative">
                <div className="flex gap-x-4 absolute top-[12px] right-0">
-                <TbDeviceFloppy size={23} color="#64748b" className="cursor-pointer" 
-                  onClick={() => handleUpdateTodo({
-                   id: todos[0].id,
-                   content: editorText,
-                   aiScore: ai_check,
-                   type: 'article_upadte'
-                  })}
-                />
+                {isSaving ? (
+                  <Spinner size="sm" color="#64748b" thickness="2px" />
+                ) : (
+                  <TbDeviceFloppy size={23} color="#64748b" className="cursor-pointer" 
+                    onClick={() => handleUpdateTodo({
+                     id: todos[0].id,
+                     content: editorText,
+                     aiScore: ai_check,
+                     type: 'article_upadte'
+                    })}
+                  />
+                )}
                 <TbCopy className="cursor-pointer" size={23} color="#64748b" onClick={copyContent}/>
                </div>
-               <ReactQuill id="my-quill-editor" theme="snow" value={editorText} style={{ height: "100%" }} onChange={setEditorText}/>
+               <ReactQuill id="my-quill-editor" theme="snow" value={editorText} style={{ height: "100%" }} onChange={setEditorText} readOnly={isSaving}/>
               </div>
               <div className="flex-[1]">
                 <div className="flex justify-end items-center h-[52px]">
@@ -272,13 +289,17 @@ const Keyword = ({id}: {id: string}) => {
                  </Link>
                 </div>
                 <div className="editor-right-col">
-                  <ScoreMeter 
-                    score={ai_check} 
+                  {/* <ScoreMeter 
+                    score={wordCount} 
                     avgScore={65} 
                     topScore={95} 
                     aiCheckRequest={ai_check_request}
                     checkAI={() => checkAI(editorText, false)}
+                    colorMode={colorMode}/> */}
+                  <ScoreMeter 
+                    score={wordCount}
                     colorMode={colorMode}/>
+
     <Box
       boxShadow="md"
       border="none"
@@ -301,10 +322,21 @@ const Keyword = ({id}: {id: string}) => {
         {/* Word Count */}
         <Flex align="center" justify="space-between">
           <Flex align="center" gap={3}>
-            <Icon as={MdOutlineTextSnippet} color="blue.500" boxSize={6} />
-            <Text fontWeight="medium" className="text-slate-500">Word Count</Text>
+            <Icon as={MdSmartToy} color="blue.500" boxSize={6} />
+            <Text fontWeight="medium" className="text-slate-500">AI Score        
+              <Button 
+               rounded="full" 
+               variant="outline" 
+               size="xs" 
+               fontWeight="normal" 
+               className='text-slate-500 ml-2'
+               disabled={ai_check_request? true : false} 
+               onClick={() => checkAI(editorText, false)}>
+              { ai_check_request ? 'Checking...' : 'Check Score'}
+              </Button>
+            </Text>
           </Flex>
-          <Text fontWeight="medium" className="text-slate-500">{wordCount} words</Text>
+          <Text fontWeight="medium" className="text-slate-500">{ai_check ? ai_check + '%' : <Spinner size="xs" color={spinnerColor} mr="16px" /> }</Text>
         </Flex>
 
         {/* Readability Score */}

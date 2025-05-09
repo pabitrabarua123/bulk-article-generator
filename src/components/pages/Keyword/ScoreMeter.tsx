@@ -10,19 +10,11 @@ import {
 
 type ScoreMeterProps = {
   score?: number | null;
-  avgScore?: number;
-  topScore?: number;
-  aiCheckRequest: boolean;
-  checkAI: () => void;
   colorMode: string;
 };
 
 const ScoreMeter: React.FC<ScoreMeterProps> = ({
   score,
-  avgScore,
-  topScore,
-  aiCheckRequest = false,
-  checkAI,
   colorMode
 }) => {
   const radius = 75;
@@ -34,11 +26,11 @@ const ScoreMeter: React.FC<ScoreMeterProps> = ({
   const strokeDashoffset = circumference * (1 - percent);
 
   return (
-    <Box p={4} rounded="xl" boxShadow="md" w="100%" bg={colorMode === 'dark' ? '#151922' : '#fff'}>
+    <Box p={6} rounded="xl" boxShadow="md" w="100%" bg={colorMode === 'dark' ? '#151922' : '#fff'}>
       {/* Header */}
       <Flex justify="center" align="center" mb={3}>
        <Text fontWeight="bold" fontSize="lg" className="text-slate-500 text-center">
-        AI Score
+        Word Count
        </Text>
       </Flex>
 
@@ -86,37 +78,11 @@ const ScoreMeter: React.FC<ScoreMeterProps> = ({
         >
           <Text fontSize="3xl" fontWeight="bold" lineHeight="1" className='text-slate-500'>
             {score ? score : 'NA'}
-            <Text as="span" fontSize="md" color="gray.500">/100</Text>
+            <Text as="span" fontSize="md" color="gray.500"></Text>
           </Text>
-          <Text fontSize="xs" color="gray.500">Suggested: &gt; 80</Text>
+          <Text fontSize="xs" color="gray.500">Words</Text>
         </Box>
       </Box>
-
-      {/* Stats */}
-      <Flex justify="space-between" mt={4} fontSize="sm" maxW="220px" mx="auto">
-        <Box textAlign="center">
-          <Text fontWeight="semibold" className='text-slate-500'>Avg. Score</Text>
-          <Text className='text-slate-500'>{avgScore}%</Text>
-        </Box>
-        <Box textAlign="center">
-          <Text fontWeight="semibold" className='text-slate-500'>Top Score</Text>
-          <Text className='text-slate-500'>{topScore}%</Text>
-        </Box>
-      </Flex>
-      <br/>
-      <Box textAlign="center">
-       <Button 
-         rounded="full" 
-         variant="outline" 
-         size="xs" 
-         fontWeight="normal" 
-         className='text-slate-500'
-         disabled={aiCheckRequest? true : false}
-         onClick={checkAI}>
-          { aiCheckRequest ? 'Checking...' : 'Check Score'}
-       </Button>
-      </Box>
-      
     </Box>
   );
 };

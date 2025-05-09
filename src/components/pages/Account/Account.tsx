@@ -20,6 +20,7 @@ import { DashboardData } from "@/app/api/dashboard/route";
 import { User } from "@prisma/client";
 import { paymentProvider } from "@/config";
 import toast from "react-hot-toast";
+import { TbFileText, TbBolt, TbCrown } from "react-icons/tb";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -113,27 +114,13 @@ export const Account = () => {
           <div className="flex-1 space-y-4 p-8 pt-6">
             
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                  Daily Balance
+                    Daily Balance
                   </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                   >
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <line x1="7" y1="9" x2="17" y2="9" />
-                    <line x1="7" y1="13" x2="17" y2="13" />
-                    <line x1="7" y1="17" x2="12" y2="17" />
-                  </svg>
+                  <TbFileText className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <Skeleton isLoaded={!isLoading}>
@@ -152,28 +139,14 @@ export const Account = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                   Lite Mode Balance
+                    Lite Mode Balance
                   </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                   >
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <line x1="7" y1="9" x2="17" y2="9" />
-                    <line x1="7" y1="13" x2="17" y2="13" />
-                    <line x1="7" y1="17" x2="12" y2="17" />
-                  </svg>
+                  <TbBolt className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <Skeleton isLoaded={!isLoading}>
                     <div className="text-2xl font-bold">
-                    { user && user?.LiteModeBalance && user.LiteModeBalance }
+                    30 Per day
                     </div>
                   </Skeleton>
                   {/* <Skeleton isLoaded={!isLoading} mt="2px">
@@ -187,20 +160,7 @@ export const Account = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">God Mode Balance</CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
+                  <TbCrown className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <Skeleton isLoaded={!isLoading}>
@@ -217,31 +177,45 @@ export const Account = () => {
               </Card>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              
+             <Card className="col-span-3">
+                <CardHeader className="flex flex-col p-6 space-y-5">
+                  <CardTitle>Free Plan</CardTitle>  
+                  <ul className="text-sm text-slate-500 pl-[20px]">
+                    <li>30 Lite Articles Per day</li>
+                    <li>2 Trial God Mode Article Credits</li>
+                  </ul>
+                  <button
+                    className="mt-[30px] bg-[#33d6e2] text-[#141824] border-none rounded-lg py-2 px-3 font-semibold cursor-pointer"
+                    onClick={() => alert('Upgrade functionality coming soon!')}
+                  >
+                    Upgrade
+                  </button>
+                </CardHeader>
+              </Card>              
               <Card className="col-span-3">
                 <CardHeader>
                   <CardTitle>Current Plan(s)</CardTitle>  
                   { planLoading && <Skeleton height="150" width="100%" mt="30px"/>}
                   { !planLoading &&
                   <div>
-                    { planData?.SubscriptionPlan && (
-                        <>
-                          <div className="text-xl mt-[10px]">{planData.SubscriptionDetails.name} Monthly Plan - <small>{planData.SubscriptionDetails.price}USD/Month</small></div>
-                          <CardDescription>
-                           <ul className="mt-[10px] pl-[20px]">
+                    { planData?.SubscriptionPlan ? (
+                      <>
+                        <div className="text-xl mt-[10px]">{planData.SubscriptionDetails.name} Monthly Plan - <small>{planData.SubscriptionDetails.price}USD/Month</small></div>
+                        <CardDescription>
+                          <ul className="mt-[10px] pl-[20px]">
                             { JSON.parse(planData.SubscriptionDetails.features).map((feature:string, index:number) => 
                               (<li key={index}>{feature}</li>)
                             )}
-                           </ul>
-                           </CardDescription>
-                           <button className="mt-[30px] bg-[#33d6e2] text-[#141824] border-none rounded-lg py-2 px-3 font-semibold cursor-pointer" onClick={() => onLoadCustomerPortal()}>Cancel plan</button>
-                        </>
-                     )
-                     }
-                   </div>
-                   }
+                          </ul>
+                        </CardDescription>
+                        <button className="mt-[30px] bg-[#33d6e2] text-[#141824] border-none rounded-lg py-2 px-3 font-semibold cursor-pointer" onClick={() => onLoadCustomerPortal()}>Cancel plan</button>
+                      </>
+                    ) : (
+                      <div className="text-slate-500 mt-[20px]">You do not have any subscription right now</div>
+                    )}
+                  </div>
+                  }
                 </CardHeader>
-                
               </Card>
             </div>
 

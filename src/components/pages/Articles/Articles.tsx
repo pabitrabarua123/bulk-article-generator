@@ -79,12 +79,20 @@ const ArticlesList: React.FC = () => {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const batch_param = searchParams.get("batch"); 
+  const batch_param = searchParams.get("batchId"); 
   const [enabled, setEnabled] = useState(false);
+  const [batchName, setBatchName] = useState<string | null>(null);
 
   useEffect(() => {
     if (batch_param) {
       setEnabled(true);
+      // Fetch batch name from API
+      fetch(`/api/article-generator/batch-name?batchId=${batch_param}`)
+        .then(res => res.json())
+        .then(data => {
+          console.log(data);
+          if (data && data.name) setBatchName(data.name);
+        });
     }
   }, [batch_param]);
 
@@ -95,7 +103,7 @@ const ArticlesList: React.FC = () => {
   } = useQuery({
     queryKey: ["todos", batch_param],
     queryFn: async () => {
-      const url = batch_param ? `/api/article-generator?batch=${batch_param}` : "/api/article-generator";
+      const url = batch_param ? `/api/article-generator?batchId=${batch_param}` : "/api/article-generator";
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -284,7 +292,7 @@ const ArticlesList: React.FC = () => {
   return (
     <Container pt={["16px", "40px"]} alignItems="flex-start" minH="100vh">
       <VStack align="flex-start" spacing={4}>
-        <Heading size="md">{batch_param ? batch_param : 'Articles generated' }</Heading>
+        <Heading size="md">{batch_param ? batchName : 'Articles generated' }</Heading>
         <Text className="text-slate-500 text-sm">
          {batch_param ? 
           'Here is a list of articles generated for this batch'
@@ -434,10 +442,10 @@ const EditTodoDialog = ({
   isLoading: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (todo: Pick<GodmodeArticles, "id" | "batch" | "content" >) => Promise<void>;
+  onUpdate: (todo: Pick<GodmodeArticles, "id" | "batchId" | "content" >) => Promise<void>;
   todo: GodmodeArticles | undefined;
 }) => {
-  const [text, setText] = useState(todo?.batch || "");
+  const [text, setText] = useState(todo?.batchId || "");
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -456,7 +464,7 @@ const EditTodoDialog = ({
             <div className="flex-1">
               <Input
                 id="text"
-                defaultValue={todo?.batch}
+                defaultValue={todo?.batchId}
                 onChange={(e) => setText(e.target.value)}
               />
             </div>

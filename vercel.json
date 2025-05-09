@@ -5,8 +5,8 @@
       "schedule": "*/5 * * * *"
     },
     {
-      "path": "/api/cron/job2",
-      "schedule": "*/5 * * * *"
+      "path": "/api/cron/reset-daily-balance",
+      "schedule": "0 0 * * *"
     }
   ]
 }

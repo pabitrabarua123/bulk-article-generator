@@ -78,15 +78,6 @@ import { useRouter } from "next/navigation";
 const Batch: React.FC = () => {
   const router = useRouter();
 
-  const abortController = new AbortController();
-
-  useEffect(() => {
-    return () => {
-      // Cleanup function to abort fetch requests
-      abortController.abort();
-    };
-  }, []);
-
   const {
     data: todosData,
     isLoading,
@@ -94,9 +85,7 @@ const Batch: React.FC = () => {
   } = useQuery({
     queryKey: ["batch"],
     queryFn: async () => {
-      const response = await fetch("/api/article-generator/batch", {
-        signal: abortController.signal,
-      });
+      const response = await fetch("/api/article-generator/batch");
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -108,8 +97,7 @@ const Batch: React.FC = () => {
   const updateTodoMutation = useMutation({
     mutationFn: async (updatedTodo: {
       id: string;
-      text?: string;
-      isCompleted?: boolean;
+      content: string;
     }) => {
       const response = await fetch("/api/article-generator", {
         method: "PUT",
@@ -117,48 +105,53 @@ const Batch: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedTodo),
-        signal: abortController.signal,
       });
       if (!response.ok) {
-        throw new Error("Failed to update todo");
+        throw new Error("Failed to update article");
       }
       return response.json();
     },
-    onSuccess: (data) => {
-      toast.success("Todo updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    onSuccess: () => {
+      toast.success("Article updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["batch"] });
     },
-    onError: (error) => {
-      toast.error("Error updating todo");
+    onError: () => {
+      toast.error("Error updating article");
     },
   });
 
   const handleUpdateTodo = async (
     todo: Pick<GodmodeArticles, "id" | "content">
   ) => {
-    return await updateTodoMutation.mutateAsync(todo);
+    return await updateTodoMutation.mutateAsync({
+      id: todo.id,
+      content: todo.content ?? "",
+    });
   };
 
   const todos = todosData?.todos || [];
 
+  console.log(todosData);
+
   type ArticlesWithMaxCreatedAt = {
     id: string;
+    batchId: string;
     batch: string;
     _max: {
       createdAt: Date;
     };
     _count: {
-        batch: number;
+        batchId: number;
       };
     updatedAt: string;
   };
   
   const columnHelper = createColumnHelper<ArticlesWithMaxCreatedAt>();
   const columns = [
-    columnHelper.accessor("batch", {
+    columnHelper.accessor("batchId", {
       cell: ({ row }) => (
         <Text size="sm" border="none">
-          <a href={`/articles?batch=${row.original.batch}`}>{row.original.batch}</a>
+          <a href={`/articles?batchId=${row.original.batchId}`}>{row.original.batch}</a>
         </Text>
       ),
       header: "Batch",
@@ -167,7 +160,7 @@ const Batch: React.FC = () => {
       id: "count",
       header: "Articles",
       cell: ({ row }: { row: Row<ArticlesWithMaxCreatedAt> }) => (
-        <div>{row.original._count.batch}</div>
+        <div>{row.original._count.batchId}</div>
       ),
     },
     {
@@ -265,6 +258,11 @@ const Batch: React.FC = () => {
 
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [todoToEdit, setTodoToEdit] = React.useState<GodmodeArticles | null>(null);
+
+  const openEditDialog = (todo: GodmodeArticles) => {
+    setTodoToEdit(todo);
+    setIsEditDialogOpen(true);
+  };
 
   const closeEditDialog = () => {
     setTodoToEdit(null);
@@ -380,11 +378,11 @@ const DeleteTodoDialog = ({
       }
       return response.json();
     },
-    onSuccess: (_, deletedTodoId) => {
+    onSuccess: () => {
       toast.success("Article deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      queryClient.invalidateQueries({ queryKey: ["batch"] });
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("Error deleting article");
     },
   });
@@ -423,42 +421,40 @@ const EditTodoDialog = ({
   isLoading: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (todo: Pick<GodmodeArticles, "id" | "batch" | "content" >) => Promise<void>;
+  onUpdate: (todo: Pick<GodmodeArticles, "id" | "content">) => Promise<void>;
   todo: GodmodeArticles | undefined;
 }) => {
-  const [text, setText] = useState(todo?.batch || "");
+  const [content, setContent] = useState(todo?.content || "");
+
+  useEffect(() => {
+    setContent(todo?.content || "");
+  }, [todo]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Todo</DialogTitle>
+          <DialogTitle>Edit Article</DialogTitle>
           <DialogDescription>
-            Update your item, mark as complete.
+            Update the article content below.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="flex items-center gap-4">
-            <Label htmlFor="text" className="w-24 text-right">
-              Todo
+            <Label htmlFor="content" className="w-24 text-right">
+              Content
             </Label>
             <div className="flex-1">
               <Input
-                id="text"
-                defaultValue={todo?.batch}
-                onChange={(e) => setText(e.target.value)}
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
               />
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Label htmlFor="is-completed" className="w-24 text-right">
-              Done
-            </Label>
-
-          </div>
         </div>
         <DialogFooter>
-          {/* <Button
+          <Button
             type="submit"
             isLoading={isLoading}
             colorScheme="brand"
@@ -471,7 +467,7 @@ const EditTodoDialog = ({
             }}
           >
             Save changes
-          </Button> */}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
