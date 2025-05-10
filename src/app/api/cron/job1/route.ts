@@ -221,7 +221,8 @@ export async function GET() {
             params.append('additional_image_required', 'No');
             params.append('expand_article', 'No');
             params.append('links', '.');
-            params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+          //  params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+            params.append('secret_key', 'kdfmnids9fds0fi4n');
 
             await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
                 method: 'POST',
