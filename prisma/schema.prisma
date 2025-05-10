@@ -190,6 +190,7 @@ model GodmodeArticles {
   status            Int         @default(0)
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
+  pendingArticles   PendingGodmodeArticles[]
 }
 
 model PendingGodmodeArticles {
@@ -197,9 +198,11 @@ model PendingGodmodeArticles {
   userId          String
   keywordId       String
   batchId         String
+  godmodeArticleId String
   cronRequest     Int         @default(0)
   cronRequestAt   DateTime    @default(now())
   createdAt       DateTime    @default(now())
+  godmodeArticle  GodmodeArticles @relation(fields: [godmodeArticleId], references: [id])
 }
 
 model batch {

@@ -110,7 +110,8 @@ export async function POST(request: Request) {
                     userId,
                     keywordId: keyword,
                     batchId: batchId,
-                    cronRequest: 0
+                    cronRequest: 0,
+                    godmodeArticleId: article.id
                 }
             });
 

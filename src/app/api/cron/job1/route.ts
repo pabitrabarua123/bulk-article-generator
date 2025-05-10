@@ -69,7 +69,7 @@ export async function GET() {
     const articlesWithContentStatus = await Promise.all(
       pendingArticlesInDB.map(async (pa) => {
         const godmodeArticle = await prismaClient.godmodeArticles.findUnique({
-          where: { id: pa.id },
+          where: { id: pa.godmodeArticleId },
           select: { content: true, id: true },
         });
         return {
