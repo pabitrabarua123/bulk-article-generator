@@ -78,7 +78,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
   return (
     <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        {/* <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
@@ -97,7 +97,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
             {selectedTeam?.label}
             <TbSelector className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
-        </PopoverTrigger>
+        </PopoverTrigger> */}
         <PopoverContent className="w-[200px] p-0">
           <Command>
             <CommandList>

@@ -106,7 +106,7 @@ export const Account = () => {
               <TeamSwitcher />
 
               <div className="ml-auto flex items-center space-x-4">
-                <Search />
+                {/* <Search /> */}
                 <UserNav />
               </div>
             </div>
@@ -146,7 +146,7 @@ export const Account = () => {
                 <CardContent>
                   <Skeleton isLoaded={!isLoading}>
                     <div className="text-2xl font-bold">
-                    30 Per day
+                    30 <span className="text-sm text-gray-500">Per day</span>
                     </div>
                   </Skeleton>
                   {/* <Skeleton isLoaded={!isLoading} mt="2px">
