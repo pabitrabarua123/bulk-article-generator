@@ -267,7 +267,7 @@ const ArticleGenerator: React.FC = () => {
 
   const start25MinLoader = () => {
     setProgressGodmode(0); // reset
-    const duration = 120; // 1500 seconds
+    const duration = 1500; // 1500 seconds
     let secondsPassed = 0;
     let apiCalled = false; // ensure it's called only once
   
