@@ -98,7 +98,7 @@ const GodmodeLoader = ({ isProcessing, progress }: GodmodeLoaderProps) => {
         boxShadow="2xl"
         maxW="500px"
         w="90%"
-        animation={`${pulse} 2s infinite`}
+        // animation={`${pulse} 2s infinite`}
       >
         <VStack spacing={6}>
           <CircularProgress
