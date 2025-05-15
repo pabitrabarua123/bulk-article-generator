@@ -55,7 +55,7 @@ export async function GET() {
             dataVariables: {
               text1: `${batch.articles} Articles generated on Godmode are now ready`,
               subject: `Articles generated in ${batch.name} are now completed`,
-              batch: batch.name
+              batch: batch.id
             },
           });
           console.log(`Successfully sent completion email to ${user.email} for batch ${batch.id}`);
@@ -124,7 +124,7 @@ export async function GET() {
               dataVariables: {
                 text1: `${finalCompleted} Articles generated on Godmode are now ready. ${failedCount} Articles could not be generated in time.`,
                 subject: `Articles generated in ${batch.name} are now completed`,
-                batch: batch.name
+                batch: batch.id
               },
             });
             console.log(`Successfully sent forced completion email to ${user.email} for batch ${batch.id}`);
@@ -166,7 +166,7 @@ export async function GET() {
               dataVariables: {
                 text1: `${batch.articles} Articles generated on Godmode are now ready`,
                 subject: `Articles generated in ${batch.name} are now completed`,
-                batch: batch.name
+                batch: batch.id
               },
             });
             console.log(`Successfully sent all-ready email to ${user.email} for batch ${batch.id}`);
@@ -253,7 +253,7 @@ export async function GET() {
               dataVariables: {
                 text1: `${currentTotalCompleted} Articles generated on Godmode are now ready. ${notReadyArticles.length} Articles are still in progress, we will email you when they are done.`,
                 subject: `Articles generated in ${batch.name} are partially completed`,
-                batch: batch.name
+                batch: batch.id
               },
             });
             console.log(`Successfully sent partial completion email to ${user.email} for batch ${batch.id}`);
@@ -322,7 +322,7 @@ export async function GET() {
                 dataVariables: {
                   text1: `${notReadyArticles.length} Articles Generated on God mode will be completed in another 20 minutes`,
                   subject: `Article Generation for ${batch.name} is taking longer than expected`,
-                  batch: batch.name
+                  batch: batch.id
                 },
               });
               console.log(`Successfully sent processing email to ${user.email} for batch ${batch.id}`);
