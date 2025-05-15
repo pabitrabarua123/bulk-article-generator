@@ -517,8 +517,15 @@ const { data: productData, isLoading: isLoadingPrice, error: errorPrice } = useQ
             onChange={(e) => setText(e.target.value)}
           />
           { lines.length > 0 &&
-          // <p className="mt-2 text-slate-500 text-sm">Keywords Added: {lines.length} | Estimated Time: { lines.length*30 > 60 ? lines.length*30/60 + ' minutes' : lines.length*30 + ' seconds'}</p>
-          <p className="mt-2 text-slate-500 text-sm">Keywords Added: {lines.length} | Estimated Time: 15 minutes</p>
+           <p className="mt-2 text-slate-500 text-sm">
+            Keywords Added: {lines.length} | 
+            Estimated Time: 
+            { !isGodMode ? 
+              lines.length*30 > 60 ? lines.length*30/60 + ' minutes' : lines.length*30 + ' seconds'
+              :
+              '15 minutes'
+            }
+            </p>
           }
         </div>
         <Button

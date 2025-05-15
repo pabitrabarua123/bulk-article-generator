@@ -94,42 +94,7 @@ const Batch: React.FC = () => {
     enabled: true,
   });
 
-  console.log(batchData);
-
-  const updateTodoMutation = useMutation({
-    mutationFn: async (updatedTodo: {
-      id: string;
-      content: string;
-    }) => {
-      const response = await fetch("/api/article-generator", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedTodo),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update article");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast.success("Article updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["batch"] });
-    },
-    onError: () => {
-      toast.error("Error updating article");
-    },
-  });
-
-  const handleUpdateTodo = async (
-    todo: Pick<GodmodeArticles, "id" | "content">
-  ) => {
-    return await updateTodoMutation.mutateAsync({
-      id: todo.id,
-      content: todo.content ?? "",
-    });
-  };
+  console.log(batchData); 
 
   const batch = batchData?.batch || [];
 
@@ -282,19 +247,6 @@ const Batch: React.FC = () => {
     setIsDeleteDialogOpen(false);
   };
 
-  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-  const [todoToEdit, setTodoToEdit] = React.useState<GodmodeArticles | null>(null);
-
-  const openEditDialog = (todo: GodmodeArticles) => {
-    setTodoToEdit(todo);
-    setIsEditDialogOpen(true);
-  };
-
-  const closeEditDialog = () => {
-    setTodoToEdit(null);
-    setIsEditDialogOpen(false);
-  };
-
  // if (isLoading) return <Text>Loading articles...</Text>;
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
@@ -317,7 +269,7 @@ const Batch: React.FC = () => {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead key={header.id} className="text-center">
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -338,7 +290,7 @@ const Batch: React.FC = () => {
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="text-center">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -366,15 +318,6 @@ const Batch: React.FC = () => {
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
       />
-      {isEditDialogOpen && (
-        <EditTodoDialog
-          todo={todoToEdit || undefined}
-          isOpen={isEditDialogOpen}
-          onClose={closeEditDialog}
-          onUpdate={handleUpdateTodo}
-          isLoading={updateTodoMutation.isPending}
-        />
-      )}
     </Container>
   );
 };
@@ -434,68 +377,5 @@ const DeleteTodoDialog = ({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
-};
-
-const EditTodoDialog = ({
-  isLoading,
-  isOpen,
-  onClose,
-  onUpdate,
-  todo,
-}: {
-  isLoading: boolean;
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdate: (todo: Pick<GodmodeArticles, "id" | "content">) => Promise<void>;
-  todo: GodmodeArticles | undefined;
-}) => {
-  const [content, setContent] = useState(todo?.content || "");
-
-  useEffect(() => {
-    setContent(todo?.content || "");
-  }, [todo]);
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Edit Article</DialogTitle>
-          <DialogDescription>
-            Update the article content below.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="flex items-center gap-4">
-            <Label htmlFor="content" className="w-24 text-right">
-              Content
-            </Label>
-            <div className="flex-1">
-              <Input
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            type="submit"
-            isLoading={isLoading}
-            colorScheme="brand"
-            onClick={async () => {
-              await onUpdate({
-                id: todo?.id || "",
-                content,
-              });
-              onClose();
-            }}
-          >
-            Save changes
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 };

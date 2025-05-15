@@ -125,11 +125,11 @@ export async function POST(request: Request) {
             params.append('additional_image_required', 'No');
             params.append('expand_article', 'No');
             params.append('links', '.');
-            params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
-          // params.append('secret_key', 'kdfmnids9fds0fi4nrjr');
+            //params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+             params.append('secret_key', 'kdfmnids9fds0fi4nrjr');
 
-            // Await the webhook call before continuing
-            await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+            // webhook call before continuing
+            fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: params.toString()
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
         }
 
         // Perform the update in a single query by calculating the updated balance directly
-        const updated = await prismaClient.user.update({
+        await prismaClient.user.update({
           where: { id: userId },
             data: {
               [balance_type]: {
