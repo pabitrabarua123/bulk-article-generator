@@ -13,13 +13,41 @@ export async function GET(req: NextRequest) {
     }
 
     const userId = session?.user.id as string;
-    const batch = await prismaClient.batch.findMany({
-      where: {
-        userId: userId,
-      },
+    const groupedArticles = await prismaClient.godmodeArticles.groupBy({
+        by: ['batchId'],
+        where: {
+          userId: session?.user?.id,
+        },
+        _count: {
+           batchId: true,
+        },
+        _max: {
+           createdAt: true,
+        },
+        orderBy: {
+           _max: {
+            createdAt: 'desc',
+           },
+        },
+      });
+      
+    // Fetch all batch names for the batchIds
+    const batchIds = groupedArticles.map((group) => group.batchId);
+    const batches = await prismaClient.batch.findMany({
+      where: { id: { in: batchIds } },
+      select: { id: true, name: true },
     });
+    const batchIdToName = Object.fromEntries(batches.map(b => [b.id, b.name]));
 
-    return NextResponse.json({ batch });
+    // Attach batch name to each group
+    const todos = groupedArticles.map(group => ({
+      ...group,
+      id: group.batchId,
+      updatedAt: group._max?.createdAt,
+      batch: batchIdToName[group.batchId] || group.batchId, // fallback to id if name missing
+    }));
+
+    return NextResponse.json({ todos });
   } catch (error) {
     console.error("Error fetching articles:", error);
     return NextResponse.json(

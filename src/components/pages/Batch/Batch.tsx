@@ -79,7 +79,7 @@ const Batch: React.FC = () => {
   const router = useRouter();
 
   const {
-    data: todosData,
+    data: batchData,
     isLoading,
     error,
   } = useQuery({
@@ -93,6 +93,8 @@ const Batch: React.FC = () => {
     },
     enabled: true,
   });
+
+  console.log(batchData);
 
   const updateTodoMutation = useMutation({
     mutationFn: async (updatedTodo: {
@@ -129,39 +131,65 @@ const Batch: React.FC = () => {
     });
   };
 
-  const todos = todosData?.todos || [];
+  const batch = batchData?.batch || [];
 
-  console.log(todosData);
-
-  type ArticlesWithMaxCreatedAt = {
+  type BatchData = {
     id: string;
-    batchId: string;
-    batch: string;
-    _max: {
-      createdAt: Date;
-    };
-    _count: {
-        batchId: number;
-      };
-    updatedAt: string;
+    name: string;
+    articles: number;
+    completed_articles: number;
+    pending_articles: number;
+    failed_articles: number;
+    status: number;
+    createdAt: Date;
+    updatedAt: Date;
   };
   
-  const columnHelper = createColumnHelper<ArticlesWithMaxCreatedAt>();
+  const columnHelper = createColumnHelper<BatchData>();
   const columns = [
-    columnHelper.accessor("batchId", {
+    columnHelper.accessor("id", {
       cell: ({ row }) => (
         <Text size="sm" border="none">
-          <a href={`/articles?batchId=${row.original.batchId}`}>{row.original.batch}</a>
+          <a href={`/articles?batchId=${row.original.id}`}>{row.original.name}</a>
         </Text>
       ),
       header: "Batch",
     }),
     {
-      id: "count",
-      header: "Articles",
-      cell: ({ row }: { row: Row<ArticlesWithMaxCreatedAt> }) => (
-        <div>{row.original._count.batchId}</div>
+      id: "completed",
+      header: "Completed Articles",
+      cell: ({ row }: { row: Row<BatchData> }) => (
+        <div>{row.original.completed_articles}</div>
       ),
+    },
+    {
+      id: "status",
+      header: "Status",
+      cell: ({ row }: { row: Row<BatchData> }) => {
+        console.log('Row data:', {
+          completed: row.original.completed_articles,
+          total: row.original.articles,
+          name: row.original.name
+        });
+        
+        const status = row.original.completed_articles === 0 
+          ? "Incomplete" 
+          : row.original.completed_articles >= row.original.articles 
+            ? "Complete" 
+            : "Partially Ready";
+        
+        const statusColor = status === "Complete" 
+          ? "green.500" 
+          : status === "Partially Ready" 
+            ? "orange.500" 
+            : "red.500";
+
+        return (
+          <Text color={statusColor} fontWeight="medium">
+            {status}
+          </Text>
+        );
+      },
     },
     {
       accessorKey: "updatedAt",
@@ -182,16 +210,16 @@ const Batch: React.FC = () => {
           </Button>
         );
       },
-      cell: ({ row }: { row: Row<ArticlesWithMaxCreatedAt> }) => (
+      cell: ({ row }: { row: Row<BatchData> }) => (
         <div className="lowercase">
-          {new Date(row.original._max.createdAt).toLocaleDateString()}
+          {new Date(row.original.createdAt).toLocaleDateString()}
         </div>
       ),
     },
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }: { row: Row<ArticlesWithMaxCreatedAt> }) => {
+      cell: ({ row }: { row: Row<BatchData> }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -202,7 +230,7 @@ const Batch: React.FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => router.push(`/articles?batch=${row.original.batch}`)}>
+              <DropdownMenuItem onClick={() => router.push(`/articles?batch=${row.original.name}`)}>
                 <TbEye className="mr-2 h-4 w-4" />
                 View
               </DropdownMenuItem>
@@ -222,10 +250,8 @@ const Batch: React.FC = () => {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data: todos,
-    columns: columns as ColumnDef<
-      Omit<GodmodeArticles, "updatedAt"> & { updatedAt: string }
-    >[],
+    data: batch,
+    columns: columns as ColumnDef<BatchData>[],
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

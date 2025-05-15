@@ -157,26 +157,35 @@ export async function POST(request: Request) {
             temperature: 0.7,
         });
         aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
-        await prismaClient.godmodeArticles.create({
-            data: {
-                userId,
-                content: aiResponse,
-                batchId: batchId,
-                keyword: text,
-                articleType: 'liteMode',
-                status: 1,
-            },
-        });
 
-        // Perform the update in a single query by calculating the updated balance directly
-        const updated = await prismaClient.user.update({
-          where: { id: userId },
-          data: {
-            [balance_type]: {
-              decrement: no_of_keyword,
+        await prismaClient.$transaction([
+          prismaClient.godmodeArticles.create({
+            data: {
+              userId,
+              content: aiResponse,
+              batchId: batchId,
+              keyword: text,
+              articleType: 'liteMode',
+              status: 1,
             },
-          },
-        });
+          }),
+          prismaClient.batch.update({
+            where: { id: batchId },
+            data: {
+              completed_articles: {
+                increment: 1
+              }
+            }
+          }),
+          prismaClient.user.update({
+            where: { id: userId },
+            data: {
+              [balance_type]: {
+                decrement: no_of_keyword,
+              },
+            },
+          })
+        ]);        
     
         return NextResponse.json({ status: 200, aiResponse });
     }
