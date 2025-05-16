@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import Image from 'next/image';
 import {
   Button,
   Text,
@@ -69,6 +70,7 @@ const Keyword = ({id}: {id: string}) => {
   const batch_name = React.useMemo(() => todosData?.batch_name || '', [todosData]);
   console.log(batch_name);
   const [editorText, setEditorText] = React.useState('');
+  const [featuredImage, setFeaturedImage] = useState<string | undefined>();
   const [wordCount, setWordCount] = useState(0);
 
   function getCount(str: string) {
@@ -104,16 +106,30 @@ const Keyword = ({id}: {id: string}) => {
 
   useEffect(() => {
     if(todos[0]?.content){
-      setEditorText(todos[0]?.content);
-      let count = getCount(todos[0]?.content);
+      let content = todos[0]?.content;
+      if(todos[0]?.featuredImage) {
+        // Find the position after h1
+        const h1EndIndex = content.indexOf('</h1>');
+        if (h1EndIndex !== -1) {
+          // Check if there's already an image after h1
+          const contentAfterH1 = content.slice(h1EndIndex);
+          const hasImageAfterH1 = contentAfterH1.includes('<img');
+          
+          if (!hasImageAfterH1) {
+            const imageHtml = `<div><img src="${todos[0].featuredImage}" alt="Featured Image" class="rounded-md" style="max-width: 100%; height: auto; margin: 20px 0;" /></div>`;
+            content = content.slice(0, h1EndIndex) + imageHtml + content.slice(h1EndIndex);
+          }
+        }
+      }
+      setEditorText(content);
+      let count = getCount(content);
       setWordCount(count);
-      //console.log('readibility score: ' + checkReadabilityScore(todos[0]?.content));
-      setReadabilityScore(checkReadabilityScore(todos[0]?.content));
+      setReadabilityScore(checkReadabilityScore(content));
 
       if(todos[0]?.aiScore){
         setAiCheck(todos[0]?.aiScore);
       }else{
-        checkAI(todos[0]?.content, true);
+        checkAI(content, true);
       }
     }
   }, [todos]);

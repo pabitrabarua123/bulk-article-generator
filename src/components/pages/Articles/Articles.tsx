@@ -198,7 +198,7 @@ const ArticlesList: React.FC = () => {
       header: 'Status',
       cell: ({ row }: { row: Row<GodmodeArticles> }) => {
         return (
-          <Text>{row.original.status === 1 ? 'Complete' : 'On progress'}</Text>
+          <Text>{row.original.status === 1 ? 'Complete' : 'In progress'}</Text>
         );
       },
     },

@@ -32,7 +32,7 @@ export const affiliateProgramLink =
 export const twitterHandle = "@myapp";
 export const twitterMakerHandle = "@johndoe";
 
-export const cannyUrl = "https://yourstore.canny.io";
+export const cannyUrl = "https://bulk-article-generator.canny.io";
 
 type PaymentProvider = "lemon-squeezy" | "stripe";
 export const paymentProvider: PaymentProvider = "stripe";

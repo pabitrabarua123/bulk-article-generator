@@ -24,7 +24,10 @@ const nextConfig = {
         ]
       }
     ]
-  }
+  },
+  images: {
+    domains: ['www.dropbox.com'],
+  },
 };
 
 module.exports = nextConfig;

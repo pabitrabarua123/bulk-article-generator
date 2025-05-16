@@ -288,7 +288,7 @@ export const SidebarMenuItems: React.FC<MenuProps> = ({
           <TbStar size="16px" /> &nbsp;
           <MenuLabel>Upgrade</MenuLabel>
         </MenuItem>
-        <MenuItem
+        {/* <MenuItem
           route={Routes.affiliates}
           currentPage={currentPage}
           isExternal
@@ -297,7 +297,7 @@ export const SidebarMenuItems: React.FC<MenuProps> = ({
         >
           <TbHeartHandshake size="16px" /> &nbsp;
           <MenuLabel>Affiliate program</MenuLabel>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem
           route={cannyUrl}
           currentPage={currentPage}
