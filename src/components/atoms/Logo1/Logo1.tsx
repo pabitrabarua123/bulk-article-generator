@@ -1,19 +1,34 @@
 import { Flex } from "@chakra-ui/react";
 import { TbRocket } from "react-icons/tb";
+import { Box } from "@chakra-ui/react";
 
 export const Logo1 = () => {
   return (
-    <Flex
-      w="40px"
-      h="40px"
-      bgColor="brand.500"
-      borderRadius="8px"
+    <Box
+      w="32px"
+      h="32px"
+      bgColor="#00B5D8"
+      borderRadius="5px"
+      display="flex"
       alignItems="center"
       justifyContent="center"
-      color="white"
     >
-      <TbRocket size="24px" />
-    </Flex>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        <path d="m15 5 3 3" />
+      </svg>
+    </Box>
   );
 };
 

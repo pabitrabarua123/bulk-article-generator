@@ -151,11 +151,25 @@ export async function POST(request: Request) {
     } else {
         let content = prompt.replace('{KEYWORD}', text);
         // Send keyword to OpenAI
+        // const response = await openai.chat.completions.create({
+        //     model: "gpt-4",
+        //     messages: [{ role: "user", content: content }],
+        //     temperature: 0.7,
+        // });
+
         const response = await openai.chat.completions.create({
-            model: "gpt-4",
-            messages: [{ role: "user", content: content }],
-            temperature: 0.7,
+          model: "gpt-4.1-nano",
+          messages: [{ role: "user", content: content }],
+          response_format: {
+            "type": "text"
+          },
+          temperature: 1,
+          max_completion_tokens: 2048,
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0
         });
+
         aiResponse = response.choices[0]?.message?.content || "No response from OpenAI";
 
         await prismaClient.$transaction([
