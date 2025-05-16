@@ -82,10 +82,10 @@ export const Hero = ({
               backgroundClip="text"
               as="span"
             >
-              Make money
+              One-Click
             </Text>
             <br />
-            while you sleep
+            High-Quality Articles
           </Heading>
           <Text
             textAlign={["center", "center", "center", "left"]}
@@ -95,7 +95,7 @@ export const Hero = ({
             fontSize={["14px", "15px", "18px", "20px"]}
             maxW={["70%", "70%", "70%", "560px"]}
           >
-            Launch faster and start making money today.
+            Generate well-researched, human-focused articles with AI. Optimized for featured snippets and complete with high-quality images. Just enter a keyword and get started.
           </Text>
 
           <Flex flexDir="column" alignItems="flex-start" px="16px" mt="24px">

@@ -3,19 +3,26 @@ import { Section } from "../atoms/Section/Section";
 
 const featuresList: Omit<FeatureProps, "showCta">[] = [
   {
-    category: "Productivity",
-    title: "Feature 1",
+    category: "Human-Focused Content",
+    title: "Write for Humans, Not Search Engines",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, diam sit amet dictum ultrices, nunc magna ullamcorper elit, vitae tincidunt nisl nunc sit amet nunc. ",
+      "Our AI understands search intent and creates content that resonates with real readers. Each article is crafted to provide genuine value and engage your audience naturally.",
     imageUrl: "https://placehold.co/600x400",
   },
   {
-    category: "Leads generation",
-    title: "Feature 2",
+    category: "Complete Content Package",
+    title: "Articles + Images in One Click",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, diam sit amet dictum ultrices, nunc magna ullamcorper elit, vitae tincidunt nisl nunc sit amet nunc. ",
+      "Get more than just text. Each article comes with high-quality AI-generated images and is optimized for featured snippets. Save hours of work with our all-in-one content generation solution.",
     imageUrl: "https://placehold.co/600x400",
   },
+  {
+    category: "Quality & Research",
+    title: "Well-Researched & Accurate",
+    description:
+      "Our AI doesn't just generate content - it researches, fact-checks, and ensures accuracy. Every article is comprehensive, well-structured, and backed by thorough research.",
+    imageUrl: "https://placehold.co/600x400",
+  }
 ];
 
 type FeaturesProps = {

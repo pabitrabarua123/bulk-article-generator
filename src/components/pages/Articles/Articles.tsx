@@ -197,8 +197,20 @@ const ArticlesList: React.FC = () => {
       enableHiding: false,
       header: 'Status',
       cell: ({ row }: { row: Row<GodmodeArticles> }) => {
+        const getStatusColor = (status: number) => {
+          switch (status) {
+            case 1:
+              return 'green.500';
+            case 2:
+              return 'red.500';
+            default:
+              return 'yellow.500';
+          }
+        };
         return (
-          <Text>{row.original.status === 1 ? 'Complete' : 'In progress'}</Text>
+          <Text color={getStatusColor(row.original.status)}>
+            {row.original.status === 1 ? 'Complete' : row.original.status === 2 ? 'Failed' : 'In progress'}
+          </Text>
         );
       },
     },
