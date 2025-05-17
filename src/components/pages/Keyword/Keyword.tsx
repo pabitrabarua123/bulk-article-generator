@@ -108,16 +108,21 @@ const Keyword = ({id}: {id: string}) => {
     if(todos[0]?.content){
       let content = todos[0]?.content;
       if(todos[0]?.featuredImage) {
+        //console.log('Featured image exists:', todos[0].featuredImage);
         // Find the position after h1
         const h1EndIndex = content.indexOf('</h1>');
+        //console.log('H1 end index:', h1EndIndex);
         if (h1EndIndex !== -1) {
-          // Check if there's already an image after h1
-          const contentAfterH1 = content.slice(h1EndIndex);
-          const hasImageAfterH1 = contentAfterH1.includes('<img');
+          // Check if there's already an image immediately after h1
+          const contentAfterH1 = content.slice(h1EndIndex, h1EndIndex + 100); // Only check first 100 chars after h1
+         // console.log('Content immediately after H1:', contentAfterH1);
+          const hasImageAfterH1 = contentAfterH1.trim().startsWith('<img') || contentAfterH1.trim().startsWith('<div><img');
+         // console.log('Has image immediately after H1:', hasImageAfterH1);
           
           if (!hasImageAfterH1) {
             const imageHtml = `<div><img src="${todos[0].featuredImage}" alt="Featured Image" class="rounded-md" style="max-width: 100%; height: auto; margin: 20px 0;" /></div>`;
             content = content.slice(0, h1EndIndex) + imageHtml + content.slice(h1EndIndex);
+          //  console.log('Image inserted after H1');
           }
         }
       }
