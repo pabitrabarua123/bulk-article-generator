@@ -8,7 +8,7 @@ export const revalidate = 0;
 export async function GET() {
   console.log("🕑 Vercel cron job ran!");
   const now = new Date();
-  const twentyFiveMinutesAgo = new Date(now.getTime() - 25 * 60 * 1000);
+  const twentyFiveMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
 
   const candidateBatches = await prismaClient.batch.findMany({
     where: {
@@ -224,7 +224,7 @@ export async function GET() {
            // params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
             params.append('secret_key', 'kdfmnids9fds0fi4nrjr');
 
-            await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+            fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: params.toString()
@@ -296,7 +296,7 @@ export async function GET() {
             params.append('secret_key', 'kdfmnids9fds0fi4nrjr');
            // params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
 
-            await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+             fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: params.toString()
