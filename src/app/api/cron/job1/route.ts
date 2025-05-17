@@ -1,6 +1,7 @@
 import { prismaClient } from "@/prisma/db";
 import { NextResponse } from 'next/server';
 import { sendTransactionalEmail } from "@/libs/loops";
+import { PendingGodmodeArticles } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -8,7 +9,7 @@ export const revalidate = 0;
 export async function GET() {
   console.log("🕑 Vercel cron job ran!");
   const now = new Date();
-  const twentyFiveMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
+  const twentyFiveMinutesAgo = new Date(now.getTime() - 25 * 60 * 1000);
 
   const candidateBatches = await prismaClient.batch.findMany({
     where: {
@@ -48,20 +49,19 @@ export async function GET() {
       
       // Send email for no pending articles
       if (user.email) {
-        try {
-          await sendTransactionalEmail({
-            transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-            email: user.email,
-            dataVariables: {
-              text1: `${batch.articles} Articles generated on Godmode are now ready`,
-              subject: `Articles generated in ${batch.name} are now completed`,
-              batch: batch.id
-            },
-          });
+        sendTransactionalEmail({
+          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+          email: user.email,
+          dataVariables: {
+            text1: `${batch.articles} Articles generated on Godmode are now ready`,
+            subject: `Articles generated in ${batch.name} are now completed`,
+            batch: batch.id
+          },
+        }).then(() => {
           console.log(`Successfully sent completion email to ${user.email} for batch ${batch.id}`);
-        } catch (error) {
+        }).catch(error => {
           console.error(`Failed to send completion email to ${user.email} for batch ${batch.id}:`, error);
-        }
+        });
       }
       continue;
     }
@@ -87,9 +87,35 @@ export async function GET() {
     // If all pending articles have been attempted, force completion
     if (hasPreviouslyAttemptedAllPending) {
       console.log(`Batch ${batch.id}: All pending articles have been attempted. Forcing completion.`);
+      let finalCompleted = 0;
+      let failedCount = 0;
+
       await prismaClient.$transaction(async (tx) => {
         const newlyCompletedCount = readyArticles.length;
-        const failedCount = notReadyArticles.length;
+        failedCount = notReadyArticles.length;
+
+        // Refund logic based on user's plan
+        if (failedCount > 0) {
+          const user = await tx.user.findUnique({ where: { id: batch.userId } });
+          if (user) {
+            if (user.monthyPlan > 0) {
+              await tx.user.update({
+                where: { id: batch.userId },
+                data: { monthyBalance: user.monthyBalance + failedCount }
+              });
+            } else if (user.lifetimePlan > 0) {
+              await tx.user.update({
+                where: { id: batch.userId },
+                data: { lifetimeBalance: user.lifetimeBalance + failedCount }
+              });
+            } else {
+              await tx.user.update({
+                where: { id: batch.userId },
+                data: { trialBalance: user.trialBalance + failedCount }
+              });
+            }
+          }
+        }
 
         await tx.batch.update({
           where: { id: batch.id },
@@ -113,26 +139,42 @@ export async function GET() {
           where: { batchId: batch.id },
         });
 
-        const finalCompleted = batch.completed_articles + newlyCompletedCount;
-        
-        // Send email for forced completion
-        if (user.email) {
-          try {
-            await sendTransactionalEmail({
-              transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-              email: user.email,
-              dataVariables: {
-                text1: `${finalCompleted} Articles generated on Godmode are now ready. ${failedCount} Articles could not be generated in time.`,
-                subject: `Articles generated in ${batch.name} are now completed`,
-                batch: batch.id
-              },
-            });
-            console.log(`Successfully sent forced completion email to ${user.email} for batch ${batch.id}`);
-          } catch (error) {
-            console.error(`Failed to send forced completion email to ${user.email} for batch ${batch.id}:`, error);
-          }
-        }
+        finalCompleted = batch.completed_articles + newlyCompletedCount;
       });
+
+      // Send email for forced completion
+      if (user.email) {
+        sendTransactionalEmail({
+          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+          email: user.email,
+          dataVariables: {
+            text1: `${finalCompleted} Articles generated on Godmode are now ready. ${failedCount} Articles could not be generated in time.`,
+            subject: `Articles generated in ${batch.name} are now completed`,
+            batch: batch.id
+          },
+        }).then(() => {
+          console.log(`Successfully sent forced completion email to ${user.email} for batch ${batch.id}`);
+        }).catch(error => {
+          console.error(`Failed to send forced completion email to ${user.email} for batch ${batch.id}:`, error);
+        });
+      }
+
+      // Send separate refund email if there are failed articles
+      if (notReadyArticles.length > 0 && user.email) {
+        sendTransactionalEmail({
+          transactionalId: "cmarsjs2719vixk0h4f8ttoak",
+          email: user.email,
+          dataVariables: {
+            text1: `${notReadyArticles.length} articles of god mode failed to generate and balance has been refunded to your account. Please retry generation after 30 minutes.`,
+            subject: 'Balance Refund Completed - God mode',
+            batch: batch.id
+          },
+        }).then(() => {
+          console.log(`Successfully sent refund email to ${user.email} for batch ${batch.id}`);
+        }).catch(error => {
+          console.error(`Failed to send refund email to ${user.email} for batch ${batch.id}:`, error);
+        });
+      }
       continue;
     }
 
@@ -156,25 +198,24 @@ export async function GET() {
         await tx.pendingGodmodeArticles.deleteMany({
           where: { batchId: batch.id },
         });
-        
-        // Send email for all articles ready
-        if (user.email) {
-          try {
-            await sendTransactionalEmail({
-              transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-              email: user.email,
-              dataVariables: {
-                text1: `${batch.articles} Articles generated on Godmode are now ready`,
-                subject: `Articles generated in ${batch.name} are now completed`,
-                batch: batch.id
-              },
-            });
-            console.log(`Successfully sent all-ready email to ${user.email} for batch ${batch.id}`);
-          } catch (error) {
-            console.error(`Failed to send all-ready email to ${user.email} for batch ${batch.id}:`, error);
-          }
-        }
       });
+
+      // Send email for all articles ready
+      if (user.email) {
+        sendTransactionalEmail({
+          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+          email: user.email,
+          dataVariables: {
+            text1: `${batch.articles} Articles generated on Godmode are now ready`,
+            subject: `Articles generated in ${batch.name} are now completed`,
+            batch: batch.id
+          },
+        }).then(() => {
+          console.log(`Successfully sent all-ready email to ${user.email} for batch ${batch.id}`);
+        }).catch(error => {
+          console.error(`Failed to send all-ready email to ${user.email} for batch ${batch.id}:`, error);
+        });
+      }
       continue;
     }
 
@@ -182,6 +223,13 @@ export async function GET() {
     if (readyArticles.length > 0 && notReadyArticles.length > 0) {
       console.log(`Batch ${batch.id}: ${readyArticles.length} ready, ${notReadyArticles.length} not ready.`);
       let newApiCallsMade = false;
+      let currentTotalCompleted = 0;
+      let articlesToCall: Array<{
+        pendingArticle: PendingGodmodeArticles;
+        godmodeArticleId: string | undefined;
+        hasContent: boolean;
+      }> = [];
+
       await prismaClient.$transaction(async (tx) => {
         await tx.batch.update({
           where: { id: batch.id },
@@ -200,41 +248,17 @@ export async function GET() {
           where: { id: { in: readyArticles.map(a => a.pendingArticle.id) } },
         });
 
-        const apiCalls = notReadyArticles.map(async (articleData) => {
+        // Collect articles that need API calls
+        for (const articleData of notReadyArticles) {
           if (articleData.pendingArticle.cronRequest === 0) {
             await tx.pendingGodmodeArticles.update({
               where: { id: articleData.pendingArticle.id },
               data: { cronRequest: 1 },
             });
             newApiCallsMade = true;
-            
-            if (!articleData.godmodeArticleId) {
-              console.error(`Batch ${batch.id}: Missing godmodeArticleId for pending article ${articleData.pendingArticle.id}. Skipping API call.`);
-              return;
-            }
-
-            const params = new URLSearchParams();
-            params.append('keyword', articleData.pendingArticle.keywordId);
-            params.append('id', articleData.godmodeArticleId);
-            params.append('comment', '.');
-            params.append('featured_image_required', 'No');
-            params.append('additional_image_required', 'No');
-            params.append('expand_article', 'No');
-            params.append('links', '.');
-           // params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
-            params.append('secret_key', 'kdfmnids9fds0fi4nrjr');
-
-            fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
-            });
-
-            console.log(`Batch ${batch.id}: Made API call for pending article ${articleData.pendingArticle.id} (keyword: ${articleData.pendingArticle.keywordId})`);
+            articlesToCall.push(articleData);
           }
-        });
-
-        await Promise.all(apiCalls);
+        }
 
         if (newApiCallsMade) {
           await tx.batch.update({ 
@@ -243,25 +267,51 @@ export async function GET() {
           });
         }
 
-        const currentTotalCompleted = batch.completed_articles + readyArticles.length;
-        
-        if (user.email) {
-          try {
-            await sendTransactionalEmail({
-              transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-              email: user.email,
-              dataVariables: {
-                text1: `${currentTotalCompleted} Articles generated on Godmode are now ready. ${notReadyArticles.length} Articles are still in progress, we will email you when they are done.`,
-                subject: `Articles generated in ${batch.name} are partially completed`,
-                batch: batch.id
-              },
-            });
-            console.log(`Successfully sent partial completion email to ${user.email} for batch ${batch.id}`);
-          } catch (error) {
-            console.error(`Failed to send partial completion email to ${user.email} for batch ${batch.id}:`, error);
-          }
-        }
+        currentTotalCompleted = batch.completed_articles + readyArticles.length;
       });
+
+      // Make API calls outside transaction
+      for (const articleData of articlesToCall) {
+        if (!articleData.godmodeArticleId) {
+          console.error(`Batch ${batch.id}: Missing godmodeArticleId for pending article ${articleData.pendingArticle.id}. Skipping API call.`);
+          continue;
+        }
+
+        const params = new URLSearchParams();
+        params.append('keyword', articleData.pendingArticle.keywordId);
+        params.append('id', articleData.godmodeArticleId);
+        params.append('comment', '.');
+        params.append('featured_image_required', 'No');
+        params.append('additional_image_required', 'No');
+        params.append('expand_article', 'No');
+        params.append('links', '.');
+        params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+
+        fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString(),
+          keepalive: true
+        });
+
+        console.log(`Batch ${batch.id}: Made API call for pending article ${articleData.pendingArticle.id} (keyword: ${articleData.pendingArticle.keywordId})`);
+      }
+
+      if (user.email) {
+        sendTransactionalEmail({
+          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+          email: user.email,
+          dataVariables: {
+            text1: `${currentTotalCompleted} Articles generated on Godmode are now ready. ${notReadyArticles.length} Articles are still in progress, we will email you when they are done.`,
+            subject: `Articles generated in ${batch.name} are partially completed`,
+            batch: batch.id
+          },
+        }).then(() => {
+          console.log(`Successfully sent partial completion email to ${user.email} for batch ${batch.id}`);
+        }).catch(error => {
+          console.error(`Failed to send partial completion email to ${user.email} for batch ${batch.id}:`, error);
+        });
+      }
       continue;
     }
 
@@ -270,42 +320,23 @@ export async function GET() {
       console.log(`Batch ${batch.id}: None of the ${notReadyArticles.length} pending articles are ready yet.`);
       let newApiCallsMade = false;
       const articlesToRequestApiFor = notReadyArticles.filter(a => a.pendingArticle.cronRequest === 0);
+      let articlesToCall: Array<{
+        pendingArticle: PendingGodmodeArticles;
+        godmodeArticleId: string | undefined;
+        hasContent: boolean;
+      }> = [];
 
       if (articlesToRequestApiFor.length > 0) {
         await prismaClient.$transaction(async (tx) => {
-          const apiCalls = articlesToRequestApiFor.map(async (articleData) => {
+          // Update database records
+          for (const articleData of articlesToRequestApiFor) {
             await tx.pendingGodmodeArticles.update({
               where: { id: articleData.pendingArticle.id },
               data: { cronRequest: 1 },
             });
             newApiCallsMade = true;
-
-            if (!articleData.godmodeArticleId) {
-              console.error(`Batch ${batch.id}: Missing godmodeArticleId for pending article ${articleData.pendingArticle.id}. Skipping API call.`);
-              return;
-            }
-
-            const params = new URLSearchParams();
-            params.append('keyword', articleData.pendingArticle.keywordId);
-            params.append('id', articleData.godmodeArticleId);
-            params.append('comment', '.');
-            params.append('featured_image_required', 'No');
-            params.append('additional_image_required', 'No');
-            params.append('expand_article', 'No');
-            params.append('links', '.');
-            params.append('secret_key', 'kdfmnids9fds0fi4nrjr');
-           // params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
-
-             fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
-            });
-
-            console.log(`Batch ${batch.id}: Made API call for pending article ${articleData.pendingArticle.id} (keyword: ${articleData.pendingArticle.keywordId})`);
-          });
-
-          await Promise.all(apiCalls);
+            articlesToCall.push(articleData);
+          }
 
           if (newApiCallsMade) {
             await tx.batch.update({ 
@@ -313,26 +344,52 @@ export async function GET() {
               data: { updatedAt: now } 
             });
           }
-          
-          if (user.email) {
-            try {
-              await sendTransactionalEmail({
-                transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-                email: user.email,
-                dataVariables: {
-                  text1: `${notReadyArticles.length} Articles Generated on God mode will be completed in another 20 minutes`,
-                  subject: `Article Generation for ${batch.name} is taking longer than expected`,
-                  batch: batch.id
-                },
-              });
-              console.log(`Successfully sent processing email to ${user.email} for batch ${batch.id}`);
-            } catch (error) {
-              console.error(`Failed to send processing email to ${user.email} for batch ${batch.id}:`, error);
-            }
-          }
         });
+
+        // Make API calls outside transaction
+        for (const articleData of articlesToCall) {
+          if (!articleData.godmodeArticleId) {
+            console.error(`Batch ${batch.id}: Missing godmodeArticleId for pending article ${articleData.pendingArticle.id}. Skipping API call.`);
+            continue;
+          }
+
+          const params = new URLSearchParams();
+          params.append('keyword', articleData.pendingArticle.keywordId);
+          params.append('id', articleData.godmodeArticleId);
+          params.append('comment', '.');
+          params.append('featured_image_required', 'No');
+          params.append('additional_image_required', 'No');
+          params.append('expand_article', 'No');
+          params.append('links', '.');
+          params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+
+          fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString(),
+            keepalive: true
+          });
+
+          console.log(`Batch ${batch.id}: Made API call for pending article ${articleData.pendingArticle.id} (keyword: ${articleData.pendingArticle.keywordId})`);
+        }
       } else {
         console.log(`Batch ${batch.id}: All pending articles already have API request sent. Waiting for content or 25-min timeout.`);
+      }
+
+      if (user.email) {
+        sendTransactionalEmail({
+          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+          email: user.email,
+          dataVariables: {
+            text1: `${notReadyArticles.length} Articles Generated on God mode will be completed in another 20 minutes`,
+            subject: `Article Generation for ${batch.name} is taking longer than expected`,
+            batch: batch.id
+          },
+        }).then(() => {
+          console.log(`Successfully sent processing email to ${user.email} for batch ${batch.id}`);
+        }).catch(error => {
+          console.error(`Failed to send processing email to ${user.email} for batch ${batch.id}:`, error);
+        });
       }
       continue;
     }
