@@ -49,19 +49,20 @@ export async function GET() {
       
       // Send email for no pending articles
       if (user.email) {
-        sendTransactionalEmail({
-          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-          email: user.email,
-          dataVariables: {
-            text1: `${batch.articles} Articles generated on Godmode are now ready`,
-            subject: `Articles generated in ${batch.name} are now completed`,
-            batch: batch.id
-          },
-        }).then(() => {
+        try {
+          await sendTransactionalEmail({
+            transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+            email: user.email,
+            dataVariables: {
+              text1: `${batch.articles} Articles generated on Godmode are now ready`,
+              subject: `Articles generated in ${batch.name} are now completed`,
+              batch: batch.id
+            },
+          });
           console.log(`Successfully sent completion email to ${user.email} for batch ${batch.id}`);
-        }).catch(error => {
+        } catch (error) {
           console.error(`Failed to send completion email to ${user.email} for batch ${batch.id}:`, error);
-        });
+        }
       }
       continue;
     }
@@ -135,6 +136,14 @@ export async function GET() {
           });
         }
 
+        // Update failed articles status to 2
+        if (failedCount > 0) {
+          await tx.godmodeArticles.updateMany({
+            where: { id: { in: notReadyArticles.map(a => a.godmodeArticleId).filter(id => id) as string[] } },
+            data: { status: 2 },
+          });
+        }
+
         await tx.pendingGodmodeArticles.deleteMany({
           where: { batchId: batch.id },
         });
@@ -144,36 +153,38 @@ export async function GET() {
 
       // Send email for forced completion
       if (user.email) {
-        sendTransactionalEmail({
-          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-          email: user.email,
-          dataVariables: {
-            text1: `${finalCompleted} Articles generated on Godmode are now ready. ${failedCount} Articles could not be generated in time.`,
-            subject: `Articles generated in ${batch.name} are now completed`,
-            batch: batch.id
-          },
-        }).then(() => {
+        try {
+          await sendTransactionalEmail({
+            transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+            email: user.email,
+            dataVariables: {
+              text1: `${finalCompleted} Articles generated on Godmode are now ready. ${failedCount} Articles could not be generated in time.`,
+              subject: `Articles generated in ${batch.name} are now completed`,
+              batch: batch.id
+            },
+          });
           console.log(`Successfully sent forced completion email to ${user.email} for batch ${batch.id}`);
-        }).catch(error => {
+        } catch (error) {
           console.error(`Failed to send forced completion email to ${user.email} for batch ${batch.id}:`, error);
-        });
+        }
       }
 
       // Send separate refund email if there are failed articles
       if (notReadyArticles.length > 0 && user.email) {
-        sendTransactionalEmail({
-          transactionalId: "cmarsjs2719vixk0h4f8ttoak",
-          email: user.email,
-          dataVariables: {
-            text1: `${notReadyArticles.length} articles of god mode failed to generate and balance has been refunded to your account. Please retry generation after 30 minutes.`,
-            subject: 'Balance Refund Completed - God mode',
-            batch: batch.id
-          },
-        }).then(() => {
+        try {
+          await sendTransactionalEmail({
+            transactionalId: "cmarsjs2719vixk0h4f8ttoak",
+            email: user.email,
+            dataVariables: {
+              text1: `${notReadyArticles.length} articles of god mode failed to generate and balance has been refunded to your account. Please retry generation after 30 minutes.`,
+              subject: 'Balance Refund Completed - God mode',
+              batch: batch.id
+            },
+          });
           console.log(`Successfully sent refund email to ${user.email} for batch ${batch.id}`);
-        }).catch(error => {
+        } catch (error) {
           console.error(`Failed to send refund email to ${user.email} for batch ${batch.id}:`, error);
-        });
+        }
       }
       continue;
     }
@@ -202,19 +213,20 @@ export async function GET() {
 
       // Send email for all articles ready
       if (user.email) {
-        sendTransactionalEmail({
-          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-          email: user.email,
-          dataVariables: {
-            text1: `${batch.articles} Articles generated on Godmode are now ready`,
-            subject: `Articles generated in ${batch.name} are now completed`,
-            batch: batch.id
-          },
-        }).then(() => {
+        try {
+          await sendTransactionalEmail({
+            transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+            email: user.email,
+            dataVariables: {
+              text1: `${batch.articles} Articles generated on Godmode are now ready`,
+              subject: `Articles generated in ${batch.name} are now completed`,
+              batch: batch.id
+            },
+          });
           console.log(`Successfully sent all-ready email to ${user.email} for batch ${batch.id}`);
-        }).catch(error => {
+        } catch (error) {
           console.error(`Failed to send all-ready email to ${user.email} for batch ${batch.id}:`, error);
-        });
+        }
       }
       continue;
     }
@@ -298,19 +310,20 @@ export async function GET() {
       }
 
       if (user.email) {
-        sendTransactionalEmail({
-          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-          email: user.email,
-          dataVariables: {
-            text1: `${currentTotalCompleted} Articles generated on Godmode are now ready. ${notReadyArticles.length} Articles are still in progress, we will email you when they are done.`,
-            subject: `Articles generated in ${batch.name} are partially completed`,
-            batch: batch.id
-          },
-        }).then(() => {
+        try {
+          await sendTransactionalEmail({
+            transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+            email: user.email,
+            dataVariables: {
+              text1: `${currentTotalCompleted} Articles generated on Godmode are now ready. ${notReadyArticles.length} Articles are still in progress, we will email you when they are done.`,
+              subject: `Articles generated in ${batch.name} are partially completed`,
+              batch: batch.id
+            },
+          });
           console.log(`Successfully sent partial completion email to ${user.email} for batch ${batch.id}`);
-        }).catch(error => {
+        } catch (error) {
           console.error(`Failed to send partial completion email to ${user.email} for batch ${batch.id}:`, error);
-        });
+        }
       }
       continue;
     }
@@ -377,19 +390,20 @@ export async function GET() {
       }
 
       if (user.email) {
-        sendTransactionalEmail({
-          transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
-          email: user.email,
-          dataVariables: {
-            text1: `${notReadyArticles.length} Articles Generated on God mode will be completed in another 20 minutes`,
-            subject: `Article Generation for ${batch.name} is taking longer than expected`,
-            batch: batch.id
-          },
-        }).then(() => {
+        try {
+          await sendTransactionalEmail({
+            transactionalId: "cm9ygo9eu6c9jybikh7bzz1hw",
+            email: user.email,
+            dataVariables: {
+              text1: `${notReadyArticles.length} Articles Generated on God mode will be completed in another 20 minutes`,
+              subject: `Article Generation for ${batch.name} is taking longer than expected`,
+              batch: batch.id
+            },
+          });
           console.log(`Successfully sent processing email to ${user.email} for batch ${batch.id}`);
-        }).catch(error => {
+        } catch (error) {
           console.error(`Failed to send processing email to ${user.email} for batch ${batch.id}:`, error);
-        });
+        }
       }
       continue;
     }
