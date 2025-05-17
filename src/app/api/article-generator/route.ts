@@ -125,16 +125,16 @@ export async function POST(request: Request) {
             params.append('additional_image_required', 'No');
             params.append('expand_article', 'No');
             params.append('links', '.');
-            params.append('secret_key', 'kdfmnids9fds0fi4nrnII');
-           // params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
+           // params.append('secret_key', 'kdfmnids9fds0fi4nrnII');
+            params.append('secret_key', 'kdfmnids9fds0fi4nrjr(*^nII');
 
             // webhook call before continuing
-           const response = await fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
+           fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
+                body: params.toString(),
+                keepalive: true
             });
-            console.log(response);
         }
 
         // Perform the update in a single query by calculating the updated balance directly

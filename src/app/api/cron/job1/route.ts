@@ -302,8 +302,7 @@ export async function GET() {
         fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params.toString(),
-          keepalive: true
+          body: params.toString()
         });
 
         console.log(`Batch ${batch.id}: Made API call for pending article ${articleData.pendingArticle.id} (keyword: ${articleData.pendingArticle.keywordId})`);
@@ -379,8 +378,7 @@ export async function GET() {
           fetch('https://hook.eu2.make.com/u0yss4lheap5qezqxgo3bcmhnhif517x', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString(),
-            keepalive: true
+            body: params.toString()
           });
 
           console.log(`Batch ${batch.id}: Made API call for pending article ${articleData.pendingArticle.id} (keyword: ${articleData.pendingArticle.keywordId})`);
